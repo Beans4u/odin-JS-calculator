@@ -3,11 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="style.css" />
+    <link rel="stylesheet" href="style.css" />
     <script src="script.js" defer></script>
     <title>The Odin Project, Fundamentals: Calculator Project</title>
   </head>
   <body>
-    <!-- Next step: create structure -->
+    <h1>Fundamentals Project: Calculator</h1>
+    <p>
+      A small JavaScript calculator built as part of The Odin Project
+      Foundations curriculum. This project focuses on practicing DOM
+      manipulation, event handling, and basic state logic in JavaScript.
+    </p>
+    <div id="calc-chassis">
+      <!-- DISPLAY SCREEN -->
+      <div id="display-screen">0</div>
+      <!-- Display screen values will be removed once styling and flexbox are complete -->
+
+      <!-- BTN NUMS 1, 2, 3 -->
+      <button class="btn-nums" data-value="1">1</button>
+      <button class="btn-nums" data-value="2">2</button>
+      <button class="btn-nums" data-value="3">3</button>
+
+      <!-- BTN DIVIDE -->
+      <button class="btn-ops" data-value="/">÷</button>
+
+      <!-- BTN NUMS 4, 5, 6 -->
+      <button class="btn-nums" data-value="4">4</button>
+      <button class="btn-nums" data-value="5">5</button>
+      <button class="btn-nums" data-value="6">6</button>
+
+      <!-- BTN MULTIPLY -->
+      <button class="btn-ops" data-value="*">×</button>
+
+      <!-- BTN NUMS 7, 8, 9 -->
+      <button class="btn-nums" data-value="7">7</button>
+      <button class="btn-nums" data-value="8">8</button>
+      <button class="btn-nums" data-value="9">9</button>
+
+      <!-- BTN SUBTRACT -->
+      <button class="btn-ops" data-value="-">−</button>
+
+      <!-- BTN NUM 0 -->
+      <button class="btn-nums" data-value="0">0</button>
+
+      <!-- BTNS DECIMAL, EQUALS, PLUS -->
+      <button class="btn-other" data-value=".">.</button>
+      <button class="btn-other" data-value="=">=</button>
+      <button class="btn-ops" data-value="+">+</button>
+
+      <!-- BTN CLEAR -->
+      <button class="btn-other" data-value="clear">C</button>
+    </div>
   </body>
 </html>

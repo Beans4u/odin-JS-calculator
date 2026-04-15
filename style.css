@@ -1,1 +1,81 @@
-/* next step: position structure elements */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:wght@400;600&display=swap');
+
+/* GLOBAL COLOURS */
+
+:root {
+  --body: #f3efe6;
+  --chassis: #53514a;
+  --display-screen: #858173;
+  --btn-nums: #a3b18a;
+  --btn-ops: #c97b63;
+  --btn-other: #e6d5b8;
+  --text-heading: #2b1f1b;
+  --text-body: #4a3b33;
+  --text-button: #2b1f1b;
+}
+/* STYLING: GLOBAL RESET */
+button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+/* STYLING: TEXT & FONTS */
+h1 {
+  color: var(--text-heading);
+  font-family: 'Lora', serif;
+  font-weight: 600;
+}
+p {
+  color: var(--text-body);
+  font-size: 18px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+#display-screen,
+button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+/* STYLING: COLOURS, ROUNDED CORNERS */
+body {
+  padding: 0 30px;
+  background-color: var(--body);
+}
+#calc-chassis {
+  background-color: var(--chassis);
+  border-radius: 10px;
+  padding: 30px;
+}
+#display-screen {
+  background-color: var(--display-screen);
+  padding: 20px;
+}
+button {
+  border-radius: 20px;
+  text-align: center;
+  color: var(--text-button);
+}
+.btn-nums {
+  background-color: var(--btn-nums);
+}
+.btn-ops {
+  background-color: var(--btn-ops);
+}
+.btn-other {
+  background-color: var(--btn-other);
+}
+
+/* TEMP LAYOUT FOR VISUALIZATION PURPOSES - REMOVE BEFORE FLEXBOX IS IMPLEMENTED */
+
+#calc-chassis {
+  width: 275px;
+}
+#display-screen {
+  width: 85%;
+}
+button {
+  width: 60px;
+  height: 60px;
+}
