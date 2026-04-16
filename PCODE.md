@@ -2,7 +2,7 @@
 
 A place for my implementation notes and working out logic.
 
-## FUNCTIONS: CALCULATE
+## FUNCTIONS: CALCULATE BY OPERATOR
 
 **Step 1 & 2: create calculation logic**  
 Create math operator functions for add, sub, mult, div.  
@@ -39,7 +39,7 @@ console.log(multiplyNums(userNum1, userNum2));
 console.log(divideNums(userNum1, userNum2));
 ```
 
-## FUNCTIONS: CALCULATE
+## FUNCTION: CALL OPERATOR-BASED CALCULATIONS
 
 **PSEUDO**  
 _The pseudo is sometimes more work for me to think of in terms of descriptive code rather than just coding it when it's very simple, I'm just coding it._
@@ -91,3 +91,47 @@ console.log('operate - sub: ', operate(userNum1, userNum2, subtractOp));
 console.log('operate - mult: ', operate(userNum1, userNum2, multiplyOp));
 console.log('operate - div: ', operate(userNum1, userNum2, divideOp));
 ```
+
+## STRUCTURE: HTML, CSS
+
+For the event listeners and actions
+
+```css
+#calc-chassis /*(as parent container) */
+#display-screen
+
+#btn-decimal
+#btn-clear
+```
+
+## STYLE: CSS
+
+for CSS styling (colours per button type)
+
+```css
+.btn
+.btn-nums
+.btn-ops
+.btn-other
+```
+
+## DATA-ATTRIBUTES: HTML
+
+For JS actions
+
+**Digits**
+
+- `data-value="0" -> "9"`
+
+**Operators**
+
+- `data-value="+"`
+- `data-value="-"`
+- `data-value="*"`
+- `data-value="/"`
+
+**Controls**
+
+- `data-value="."`
+- `data-value="="`
+- `data-value="clear"`

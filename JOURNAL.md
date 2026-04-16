@@ -34,9 +34,12 @@ Need to start thinking about project. I think I'll follow along with the assignm
 
 **Step 4: create UI**
 
-- [] Create the HTML UI with num & op buttons.
-- [] Create `clear` and `equals` buttons.
-- [] Create display screen for calculations.
+- [x] Create the HTML UI with num & op buttons.
+- [x] Create `clear` and `equals` buttons.
+- [x] Create display screen for calculations.
+
+Need to find a way to identify unique button values. CSS IDs?
+On Etch-a-Sketch, I considered using data attributes, I can try to use them here.
 
 **Step 5: event handling, input**  
 _On button click:_
