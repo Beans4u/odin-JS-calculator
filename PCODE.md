@@ -13,30 +13,36 @@ _The pseudo is sometimes more work for me to think of in terms of descriptive co
 
 ```js
 function addNums(num1, num2) {
-  return num1 + num2;
+  const result = num1 + num2;
+  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
+  return rounded;
 }
 function subtractNums(num1, num2) {
-  return num1 - num2;
+  const result = num1 - num2;
+  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
+  return rounded;
 }
 function multiplyNums(num1, num2) {
-  return num1 * num2;
+  const result = num1 * num2;
+  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
+  return rounded;
 }
 function divideNums(num1, num2) {
-  return num1 / num2;
+  const result = num1 / num2;
+  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
+  return rounded;
 }
 
-// basic test
-let userNum1 = 2;
-let userNum2 = 4;
+// TESTING PLAYGROUND
 
-// long decimals are rounded
-let userNum1 = 2.222228385415678538145386154;
-let userNum2 = 4.22645167818453478415648145355254518994584;
+//basic test - use valid numbers only
+// let userNum1 = 2;
+// let userNum2 = 4;
 
-console.log(addNums(userNum1, userNum2));
-console.log(subtractNums(userNum1, userNum2));
-console.log(multiplyNums(userNum1, userNum2));
-console.log(divideNums(userNum1, userNum2));
+// console.log(addNums(userNum1, userNum2));
+// console.log(subtractNums(userNum1, userNum2));
+// console.log(multiplyNums(userNum1, userNum2));
+// console.log(divideNums(userNum1, userNum2));
 ```
 
 ## FUNCTION: CALL OPERATOR-BASED CALCULATIONS
@@ -50,46 +56,62 @@ Calls math function based on operator used.
 
 ```JS
 //Operator variables
-const addOp = '+';
-const subtractOp = '-';
-const multiplyOp = '*';
-const divideOp = '/';
+const OPERATOR = {
+  ADDED_BY: '+',
+  SUBTRACTED_BY: '-',
+  MULTIPLIED_BY: '*',
+  DIVIDED_BY: '/',
+};
 
-function operate(num1, num2, operator) {
-  if (!Number(num1) || !Number(num2))
-    return alert('Please enter a valid number'); //placeholder error handling
-  switch (operator) {
-    case '+':
-      return addNums(num1, num2);
-    case '-':
-      return subtractNums(num1, num2);
-    case '*':
-      return multiplyNums(num1, num2);
-    case '/':
-      return divideNums(num1, num2);
+function operate(num1, num2, op) {
+  let firstOperand = Number(num1);
+  let secondOperand = Number(num2);
+  if (Number.isNaN(firstOperand) || Number.isNaN(secondOperand)) {
+    return console.log('Error catch: Please enter a valid number'); //placeholder error handling, will be updated to append to UI
+  }
+
+  switch (op) {
+    case OPERATOR.ADDED_BY:
+      return addNums(firstOperand, secondOperand);
+    case OPERATOR.SUBTRACTED_BY:
+      return subtractNums(firstOperand, secondOperand);
+    case OPERATOR.MULTIPLIED_BY:
+      return multiplyNums(firstOperand, secondOperand);
+    case OPERATOR.DIVIDED_BY:
+      return divideNums(firstOperand, secondOperand);
     default:
-      return alert('there was an error'); //placeholder error handling
+      return console.log('SWITCH default: there was an error'); //placeholder error handling, will be updated to append to UI
   }
 }
 
-// testing playground
+// - - - - - TESTING PLAYGROUND - - - - - -
+// Note: user input is always passed in as a string
 
 //basic test
-// let userNum1 = 2;
-let userNum2 = '4';
+// let userNum1 = '2';
+// let userNum2 = '4';
 
 // long decimals are rounded (used parseFloat in return)
-let userNum1 = '2.22222838545678538145386154';
-// let userNum2 = 4.22645167818453478415648145355254518994584;
+// let userNum1 = '2.22538145386154';
+// let userNum2 = 4.22615648145355254518994584;
 
-// more than one decimal (used Number to validate)
-// let userNum1 = '2.22222838545678538145386154';
-// let userNum2 = 4.22645167.81845347841564814.5355254518994584;
+// multiple decimals are handled
+let userNum1 = '2.2222256785.38146154';
+let userNum2 = '4.2264.8.4.5194584';
 
-console.log('operate - add: ', operate(userNum1, userNum2, addOp));
-console.log('operate - sub: ', operate(userNum1, userNum2, subtractOp));
-console.log('operate - mult: ', operate(userNum1, userNum2, multiplyOp));
-console.log('operate - div: ', operate(userNum1, userNum2, divideOp));
+console.log('operate - add: ', operate(userNum1, userNum2, OPERATOR.ADDED_BY));
+console.log(
+  'operate - add: ',
+  operate(userNum1, userNum2, OPERATOR.SUBTRACTED_BY)
+);
+console.log(
+  'operate - add: ',
+  operate(userNum1, userNum2, OPERATOR.MULTIPLIED_BY)
+);
+console.log(
+  'operate - add: ',
+  operate(userNum1, userNum2, OPERATOR.DIVIDED_BY)
+);
 ```
 
 ## STRUCTURE: HTML, CSS
@@ -135,3 +157,15 @@ For JS actions
 - `data-value="."`
 - `data-value="="`
 - `data-value="clear"`
+
+## STATE: DISPLAY
+
+Still thinking about this, but I have this here for now:
+
+```JS
+const numberState = {
+  numState1: 0,
+  numState2: 0,
+  runningTotal: 0,
+};
+```

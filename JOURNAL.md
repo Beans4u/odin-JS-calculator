@@ -6,54 +6,50 @@
 
 Single-operation calculator (a operator b), chained step-by-step, with safe state handling and clear/reset functionality. See [DESIGN constraints](DESIGN.md) for more.
 
-## Project planning, next steps
+## Project planning, next steps: Assignment page instructions, interpreted
 
-2026-04-13  
-Need to start thinking about project. I think I'll follow along with the assignment workflow to get started. I should commit my skeleton first.
+Starting fresh - I misunderstood some instructions three days ago when I parsed this, which confused me when I worked on it later with less-fresh eyes. I re-parsed the instructions, and need to refactor some of my work.
 
-### Assignment page instructions, interpreted
+### Steps 1 & 2: Create functions that return result of calculation
 
-2026-04-13  
-**Required behaviour:**
+- [x] Create functions add, subtract, multiply, divide, that returns result of said calcs.
+- [] Behaviour/testing:
+  - [x] Must round to 2 _(for now - the requirement is that they don't overflow the display screen iirc)_
+  - [] Handle divide by zero safely.
 
-- [] Support chained operations (e.g. `12 + 7 - 1`).
-- [] Only calculate when 2 numbers + operator exist.
-- [] Clear resets all state.
-- [] Handle divide by zero safely.
-- [] Repeated operators don't trigger calc (last op wins).
+### Step 3: Create operate() that calls the above calc functions
 
-**Step 1 & 2: create calculation logic**
+- [x] Create `operate(operand, operand, operator)`.
+- [x] Create variables for the operator and operands
 
-- [x] Create math operator functions for add, sub, mult, div.
-- [x] Test in browser console.
-
-**Step 3: create function for calc logic**
-
-- [x] Create `operate()` function, will take operator and 2 nums
-- [x] Calls math function based on operator used.
-
-**Step 4: create UI**
+### Step 4: Create HTML skeleton of calculator
 
 - [x] Create the HTML UI with num & op buttons.
 - [x] Create `clear` and `equals` buttons.
-- [x] Create display screen for calculations.
+- [x] Create display screen for calculations with dummy numbers.
+- [x] I also went ahead and filled it with classes and data-attributes I assumed I'd be using later :D
 
-Need to find a way to identify unique button values. CSS IDs?
-On Etch-a-Sketch, I considered using data attributes, I can try to use them here.
+### Step 5: Create and wire event handlers
 
-**Step 5: event handling, input**  
-_On button click:_
+- [] create and wire event handler to `operate()` from user input
+- [] create and append text to the `display-screen` of buttons clicked
+- [] create and append text to the `display-screen` of result after `=` is clicked
+- [] store input in calc state (for chaining)
+- Behaviour/testing:
+  - [] clear display screen when `clear` is clicked
+  - [] calculations chain if the user clicks on another operator instead of the `=`
+  - [] Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
+  - [] when multiple operators are clicked, only the last one clicked is used
+  - [] disable the `.` button when used once to handle that requirement.
 
-- [] Update display.
-- [] Store input in calc state (first num, op, second num).
+### Step 6: "Make it work"
 
-**Step 6: calc, state flow**
+### Step 6: calc, state flow
 
 - [] On click of equals button / chaining operators: run `operate()` using stored values.
-- [] Display result of `operate()` on screen.
 - [] Result becomes the next first number.
 
-**Step 7: error testing:**
+### Step 7: error testing
 
 - [x] long decimals are rounded (no overflow)
 - [ ] pressing `equals` with incomplete input does nothing
@@ -62,3 +58,82 @@ _On button click:_
 - [ ] operation only runs with: number -> operator -> number
 - [ ] repeated operators don't trigger calculation (last operator wins)
 - [ ] after displaying a result, entering a digit starts a new calculation
+
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+. _Prettier keeps erasing my empty paragraphs, so we're doing this Instagram-style_
+
+## Below: TOP Calculator instructions
+
+> The [instructions from TOP](https://www.theodinproject.com/lessons/foundations-calculator) that I re-parsed. My space to think through the text.
+
+**Step 1:**  
+ Your calculator is going to contain functions for all of the basic math operators you typically find on calculators, so start by creating functions for the following items and testing them in your browser’s console:
+
+- add
+- subtract
+- multiply
+- divide
+
+> translation: create calc functions to obtain the result for the above calculation types
+
+**Step two:**  
+A calculator operation will consist of a number, an operator, and another number. For example, 3 + 5.  
+Create three variables, one for each part of the operation. You’ll use these variables to update your display later.
+
+> Translation: operate() will use a number + operator + number, e.g. 3 + 5. Create a variable for each of those (total of three), e.g. `num1`, `num2`, `OPERATOR`
+
+**Step three:**  
+Create a new function `operate` that takes an operator and two numbers and then calls one of the above functions on the numbers.
+
+> Translation:
+>
+> - Create `operate()` with parameters for `num1`, `num2`, and `OPERATOR`, so: `operate(number1, number2, operator)`.
+> - It calls one of the four calc functions we just made
+
+**Step four:**  
+Create a basic HTML calculator with buttons for each digit and operator (including `=`).
+
+- Don’t worry about making them functional just yet.
+- There should also be a display for the calculator. Go ahead and fill it with some dummy numbers so it looks correct.
+- Add a “clear” button.
+
+> translation: create HTML skeleton of calculator including a display with dummy numbers.
+> I also went ahead and filled it with classes and data-attributes I assumed I'd be using later
+
+**Step five:**  
+Create the functions that update one of your number variables when the calculator’s digit buttons are clicked.
+
+> "one of your number variables", I assuming `num1` and `num2`, as required.
+> i.e. create and wire event handler to the functions I previously made.
+
+Your calculator’s display should also update to reflect the value of that number variable.
+
+> i.e. wire the (same?) event handler to create and append text to the `display-screen`.
+
+**Step six:**  
+Make the calculator work! You’ll need to store the first and second numbers input by the user.
+
+> isn't this handled in step 5?
+
+... and then `operate()` on them when the user presses the `=` button, according to the operator that was selected between the numbers.
+
+> isn't this handled in steps 3 and 5?
+
+- Once operate has been called, update the display with the result of the operation.
+- Figure out how to store all the values and call the operate function with them.
+
+> i.e. again, aren't these step 5 problems? Methinks this step was just meant as a troubleshooting step.
+
+**Step 7**
+(a whole bunch of gotchas)
+
+> i.e. my personal error testing checklist.
