@@ -66,6 +66,8 @@ const OPERATOR = {
 function operate(num1, num2, op) {
   let firstOperand = Number(num1);
   let secondOperand = Number(num2);
+
+  // short-circuit if invalid number
   if (Number.isNaN(firstOperand) || Number.isNaN(secondOperand)) {
     return console.log('Error catch: Please enter a valid number'); //placeholder error handling, will be updated to append to UI
   }
@@ -78,6 +80,11 @@ function operate(num1, num2, op) {
     case OPERATOR.MULTIPLIED_BY:
       return multiplyNums(firstOperand, secondOperand);
     case OPERATOR.DIVIDED_BY:
+      if (secondOperand === 0) {
+        return console.log(
+          "Divide by zero error: So you thought you'd divide by zero, eh?"
+        );
+      }
       return divideNums(firstOperand, secondOperand);
     default:
       return console.log('SWITCH default: there was an error'); //placeholder error handling, will be updated to append to UI
@@ -96,8 +103,12 @@ function operate(num1, num2, op) {
 // let userNum2 = 4.22615648145355254518994584;
 
 // multiple decimals are handled
-let userNum1 = '2.2222256785.38146154';
-let userNum2 = '4.2264.8.4.5194584';
+// let userNum1 = '2.2222256785.38146154';
+// let userNum2 = '4.2264.8.4.5194584';
+
+// can divide by zero
+let userNum1 = '6';
+let userNum2 = '0';
 
 console.log('operate - add: ', operate(userNum1, userNum2, OPERATOR.ADDED_BY));
 console.log(
@@ -137,7 +148,7 @@ for CSS styling (colours per button type)
 .btn-other
 ```
 
-## DATA-ATTRIBUTES: HTML
+### DATA-ATTRIBUTES: HTML
 
 For JS actions
 
@@ -168,4 +179,72 @@ const numberState = {
   numState2: 0,
   runningTotal: 0,
 };
+```
+
+## EVENT HANDLERS
+
+### DOM ELEMENTS
+
+```JS
+const calculatorButtons = document.querySelector('#button-container');
+const numberButtons = document.querySelectorAll('.btn-nums');
+let displayScreen = document.getElementById('display-screen');
+const SCREEN_FULL = 'max characters reached';
+
+// testing
+// console.log('Number Button Nodes: ', numberButtons);
+// console.log('Display Screen: ', displayScreen);
+// const operatorButtons = document.querySelectorAll('btn-ops');
+// const otherButtons = document.querySelectorAll('btn-other');
+```
+
+### HANDLE NUMBER CLICKED DISPLAY
+
+Any number buttons clicked will update the display with the number button value. e.g. if button "1" is clicked, the display shows "1". If "2" is clicked, it updates to "12".
+
+```JS
+numberButtons.forEach((button) => {
+  button.addEventListener('click', function handleNumClickedDisplay(event) {
+    console.log('button-clicked: ', event.target.getAttribute('data-value'));
+
+    // print the data-value to the screen
+    const printValue = event.target.getAttribute('data-value');
+
+    if (displayScreen.textContent.length > 10) {
+      return (displayScreen.textContent = SCREEN_FULL);
+    }
+    displayScreen.textContent += printValue;
+    return console.log('print value: ', displayScreen.textContent.length);
+  });
+});
+```
+
+### HANDLE CLEAR DISPLAY
+
+Clicking the clear button resets the display to 0.
+
+**Housecleaning/to-do**: Reset state on click (state will be built alongside `handleOperate`).
+
+```JS
+calculatorButtons.addEventListener('click', function handleClearDisplay(event) {
+  console.log('button-clicked: ', event.target.getAttribute('data-value'));
+  console.log(
+    'event target has clear attribute?: ',
+    event.target.matches('[data-value="clear"]')
+  );
+  if (event.target.matches('[data-value="clear"]')) {
+    return (displayScreen.textContent = '0');
+  }
+});
+```
+
+### HANDLE OPERATE
+
+```JS
+
+// Get user input from button clicks
+
+//
+
+
 ```

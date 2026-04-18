@@ -15,7 +15,7 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
 - [x] Create functions add, subtract, multiply, divide, that returns result of said calcs.
 - [] Behaviour/testing:
   - [x] Must round to 2 _(for now - the requirement is that they don't overflow the display screen iirc)_
-  - [] Handle divide by zero safely.
+  - [x] Handle divide by zero safely.
 
 ### Step 3: Create operate() that calls the above calc functions
 
@@ -31,30 +31,28 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
 
 ### Step 5: Create and wire event handlers
 
-- [] create and wire event handler to `operate()` from user input
-- [] create and append text to the `display-screen` of buttons clicked
+- [] create and wire event handler to `handleNumClickedDisplay` from user input
+- [] create and wire event handler to `handleClearDisplay` from user input
+  - [] Add reset state on click (state will be built alongside `handleOperate`).
+- [] create and wire event handler to `handleOperate` from user input
+  - [] create calc state for chaining operations
 - [] create and append text to the `display-screen` of result after `=` is clicked
-- [] store input in calc state (for chaining)
+
 - Behaviour/testing:
-  - [] clear display screen when `clear` is clicked
-  - [] calculations chain if the user clicks on another operator instead of the `=`
-  - [] Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
-  - [] when multiple operators are clicked, only the last one clicked is used
-  - [] disable the `.` button when used once to handle that requirement.
+  - [x] reset `displayScreen` to `0` when `clear` is clicked
+  - [] `handleOperate`: Calculations chain if the user clicks on another operator instead of the `=`
+  - [] `handleOperate`: Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
+  - [] `handleOperate`: When multiple operators are clicked, only the last one clicked is used
+  - [] disable the `.` button when used once per operand to handle that requirement. Use bool state?
 
-### Step 6: "Make it work"
-
-### Step 6: calc, state flow
+### Step 6 & 7: "make it work", error testing
 
 - [] On click of equals button / chaining operators: run `operate()` using stored values.
 - [] Result becomes the next first number.
-
-### Step 7: error testing
-
 - [x] long decimals are rounded (no overflow)
 - [ ] pressing `equals` with incomplete input does nothing
 - [ ] `clear` resets state and display
-- [ ] division by zero shows 'snarky' error
+- [x] division by zero shows 'snarky' error
 - [ ] operation only runs with: number -> operator -> number
 - [ ] repeated operators don't trigger calculation (last operator wins)
 - [ ] after displaying a result, entering a digit starts a new calculation

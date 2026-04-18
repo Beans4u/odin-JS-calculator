@@ -8,7 +8,7 @@
   --display-screen: #858173;
   --btn-nums: #a3b18a;
   --btn-ops: #c97b63;
-  --btn-other: #e6d5b8;
+  --btn-controls: #e6d5b8;
   --text-heading: #2b1f1b;
   --text-body: #4a3b33;
   --text-button: #2b1f1b;
@@ -63,8 +63,8 @@ button {
 .btn-ops {
   background-color: var(--btn-ops);
 }
-.btn-other {
-  background-color: var(--btn-other);
+.btn-controls {
+  background-color: var(--btn-controls);
 }
 
 /* TEMP LAYOUT FOR VISUALIZATION PURPOSES - REMOVE BEFORE FLEXBOX IS IMPLEMENTED */
