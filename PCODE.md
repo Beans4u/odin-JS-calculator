@@ -132,9 +132,7 @@ For the event listeners and actions
 ```css
 #calc-chassis /*(as parent container) */
 #display-screen
-
-#btn-decimal
-#btn-clear
+#button-container
 ```
 
 ## STYLE: CSS
@@ -142,10 +140,9 @@ For the event listeners and actions
 for CSS styling (colours per button type)
 
 ```css
-.btn
 .btn-nums
 .btn-ops
-.btn-other
+.btn-controls
 ```
 
 ### DATA-ATTRIBUTES: HTML
@@ -169,19 +166,81 @@ For JS actions
 - `data-value="="`
 - `data-value="clear"`
 
-## STATE: DISPLAY
+## EVENT HANDLERS
 
-Still thinking about this, but I have this here for now:
+### STATE: DECIMAL USED ONCE PER OPERAND
+
+TODO: Work out logic.
+
+**Intent:**  
+To prevent user from submitting multiple decimals per operand, it will be disabled if it was already used once per operand.
+
+It will flip to true when used once.  
+It will flip to false on click of the `=` or operator (`+`, `-`, `*`, `/`) buttons.
 
 ```JS
-const numberState = {
-  numState1: 0,
-  numState2: 0,
-  runningTotal: 0,
-};
+const decimalUsed = false;
 ```
 
-## EVENT HANDLERS
+### STATE MANAGEMENT
+
+```JS
+const fsmConfig = {
+    // IDLE - hasn't been used yet
+
+    // OPERAND1_ACTIVE the user is entering numbers for the first operand
+        // every digit gets appended to operand1
+        // if user clicks operator, move to mode OPERATOR_CLICKED
+
+    // OPERAND2_ACTIVE the user is entering numbers for the second operand
+        // every digit gets appended to operand2
+        // if user clicks an operator, call operate(operand1, operand2, currentOperator)
+            // put that result into operand1
+            // clear operand2
+            // start newOperator as currentOperator
+
+    // OPERAND2_WAIT the user clicked an operator but did not enter numbers yet
+        // if the user clicks an operator, update newOperator as currentOperator
+
+    // EQUALS_CLICKED the user wants the result of the calculation
+        // call operate(operand1, operand2, currentOperator)
+        // display result on screen
+        // if user clicks an operator, put the result of operate into operand1
+        // if user clicks an operand, call clear()
+
+    // CLEAR_CLICKED the user wants to start fresh
+        // return state to IDLE
+}
+```
+
+### HANDLE OPERATE
+
+TODO: Work out logic
+
+Will send the values of number and operator buttons clicked to the function operate().
+
+```JS
+
+// Get user input from button clicks
+
+//
+
+
+```
+
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+
+## Code graveyard, for reference only
 
 ### DOM ELEMENTS
 
@@ -195,12 +254,13 @@ const SCREEN_FULL = 'max characters reached';
 // console.log('Number Button Nodes: ', numberButtons);
 // console.log('Display Screen: ', displayScreen);
 // const operatorButtons = document.querySelectorAll('btn-ops');
-// const otherButtons = document.querySelectorAll('btn-other');
+// const otherButtons = document.querySelectorAll('btn-controls');
 ```
 
 ### HANDLE NUMBER CLICKED DISPLAY
 
-Any number buttons clicked will update the display with the number button value. e.g. if button "1" is clicked, the display shows "1". If "2" is clicked, it updates to "12".
+Any number buttons clicked will update the display with the number button value.
+e.g. if button `1` is clicked, the display shows `"1"`. If `2` is clicked, it updates to `"12"`.
 
 ```JS
 numberButtons.forEach((button) => {
@@ -210,7 +270,7 @@ numberButtons.forEach((button) => {
     // print the data-value to the screen
     const printValue = event.target.getAttribute('data-value');
 
-    if (displayScreen.textContent.length > 10) {
+    if (displayScreen.textContent.length > 20) {
       return (displayScreen.textContent = SCREEN_FULL);
     }
     displayScreen.textContent += printValue;
@@ -238,13 +298,79 @@ calculatorButtons.addEventListener('click', function handleClearDisplay(event) {
 });
 ```
 
-### HANDLE OPERATE
+housekkeping: remove zero when user starts entering numbers
+
+```js
+calculatorState.ENTERING_OPERAND === 0
+  ? (calculatorState.ENTERING_OPERAND = event.target.getAttribute('data-value'))
+  : (calculatorState.ENTERING_OPERAND +=
+      event.target.getAttribute('data-value'));
+```
+
+### HANDLE OPERAND STATE
 
 ```JS
+// - - - HANDLE OPERAND STATE - - - -
 
-// Get user input from button clicks
+calculatorButtons.addEventListener('click', function handleOperandState(event) {
+  //   console.log('button-clicked: ', event.target.getAttribute('data-value'));
 
-//
+  if (
+    event.target.classList.contains('btn-nums') &&
+    calculatorState.operatorClicked === false
+  ) {
+    calculatorState.userOperand1 += event.target.getAttribute('data-value');
+    return console.log('userOperand 1: ', calculatorState.userOperand1);
+  } else if (
+    event.target.classList.contains('btn-nums') &&
+    calculatorState.operatorClicked === true
+  ) {
+    calculatorState.userOperand2 += event.target.getAttribute('data-value');
+    return console.log('userOperand 2: ', calculatorState.userOperand2);
+  }
+});
+```
 
+### HANDLE OPERATOR STATE
+
+```JS
+// - - - HANDLE OPERATOR STATE - - - -
+
+calculatorButtons.addEventListener(
+  'click',
+  function handleOperatorState(event) {
+    // console.log('button-clicked: ', event.target.className);
+    // console.log(
+    //   'button clicked data value: ',
+    //   event.target.getAttribute('data-value')
+    // );
+    // console.log(
+    //   'FUNC SCOPE user operator used: ',
+    //   calculatorState.userOperatorlUsed
+    // );
+    // console.log(
+    //   'FUNC SCOPE user operator value: ',
+    //   calculatorState.userOperator
+    // );
+
+    // if operator is used,
+    // flip used bool from false to true
+    // update userOp state to value of op button
+
+    if (
+      event.target.classList.contains('btn-ops') &&
+      calculatorState.userOperatorlUsed === false
+    ) {
+      calculatorState.userOperatorlUsed = true;
+      calculatorState.userOperator = event.target.getAttribute('data-value');
+      console.log('user operator clicked: ', calculatorState.userOperatorlUsed);
+      return console.log('user operator value: ', calculatorState.userOperator);
+    } else if (
+      event.target.classList.contains('btn-ops') &&
+      calculatorState.userOperatorlUsed === true
+    ) {
+    }
+  }
+);
 
 ```

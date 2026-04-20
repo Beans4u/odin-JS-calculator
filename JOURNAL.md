@@ -1,6 +1,6 @@
 # Project Journal
 
-**Purppse:** to create a space for me to work through problems.
+**Purpose:** to create a space for me to work through problems.
 
 ## MVP Focus
 
@@ -13,7 +13,7 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
 ### Steps 1 & 2: Create functions that return result of calculation
 
 - [x] Create functions add, subtract, multiply, divide, that returns result of said calcs.
-- [] Behaviour/testing:
+- [x] Behaviour/testing:
   - [x] Must round to 2 _(for now - the requirement is that they don't overflow the display screen iirc)_
   - [x] Handle divide by zero safely.
 
@@ -31,11 +31,17 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
 
 ### Step 5: Create and wire event handlers
 
+TODO:
+
+- [] Decimals don't work in numberButtons.forEach (handleNumClickedDisplay), need to refactor.
+  - I think this will work better if it handled display for all things based on conditions, return to calculator buttons delegation.
+- [] create calc state for chaining operations
+- [] create and wire event handler to `handleOperate` from user input
+
+Once logic is complete:
+
 - [] create and wire event handler to `handleNumClickedDisplay` from user input
 - [] create and wire event handler to `handleClearDisplay` from user input
-  - [] Add reset state on click (state will be built alongside `handleOperate`).
-- [] create and wire event handler to `handleOperate` from user input
-  - [] create calc state for chaining operations
 - [] create and append text to the `display-screen` of result after `=` is clicked
 
 - Behaviour/testing:
@@ -45,7 +51,7 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
   - [] `handleOperate`: When multiple operators are clicked, only the last one clicked is used
   - [] disable the `.` button when used once per operand to handle that requirement. Use bool state?
 
-### Step 6 & 7: "make it work", error testing
+### Step 6 & 7: "make it work", global error testing
 
 - [] On click of equals button / chaining operators: run `operate()` using stored values.
 - [] Result becomes the next first number.
