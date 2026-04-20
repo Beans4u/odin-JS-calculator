@@ -182,35 +182,123 @@ It will flip to false on click of the `=` or operator (`+`, `-`, `*`, `/`) butto
 const decimalUsed = false;
 ```
 
-### STATE MANAGEMENT
+### OPERATION STATE / DATA
+
+```JS
+const operationState = {
+    userOperand1: "",
+    userOperand2: "",
+    currentOperator: "",
+    newOperator: "",
+}
+```
+
+### STATE MANAGEMENT / LABELS
 
 ```JS
 const fsmConfig = {
-    // IDLE - hasn't been used yet
+    IDLE: {}, // calculator hasn't been used yet
 
-    // OPERAND1_ACTIVE the user is entering numbers for the first operand
-        // every digit gets appended to operand1
-        // if user clicks operator, move to mode OPERATOR_CLICKED
+    OPERAND1_ACTIVE: {}, // the user is entering numbers for the first operand
 
-    // OPERAND2_ACTIVE the user is entering numbers for the second operand
-        // every digit gets appended to operand2
-        // if user clicks an operator, call operate(operand1, operand2, currentOperator)
-            // put that result into operand1
-            // clear operand2
-            // start newOperator as currentOperator
+    OPERAND2_WAIT: {}, // the user clicked an operator but did not enter numbers yet
 
-    // OPERAND2_WAIT the user clicked an operator but did not enter numbers yet
-        // if the user clicks an operator, update newOperator as currentOperator
+    OPERAND2_ACTIVE: {}, // the user is entering numbers for the second operand
 
-    // EQUALS_CLICKED the user wants the result of the calculation
-        // call operate(operand1, operand2, currentOperator)
-        // display result on screen
-        // if user clicks an operator, put the result of operate into operand1
-        // if user clicks an operand, call clear()
+    EQUALS_CLICKED: {}, // the user wants the result of the calculation
 
-    // CLEAR_CLICKED the user wants to start fresh
-        // return state to IDLE
+    CLEAR_CLICKED: {}, // the user wants to start fresh
 }
+```
+
+### FSM CONTEXT / DATA
+
+```JS
+const calculator = {
+    currentState: STATES.IDLE,
+}
+```
+
+### FSM DISPATCH
+
+```JS
+calculatorButtons.addEventListener('click, function handleInput(event) {
+    switch (calculator.currentState) {
+
+        case STATES.IDLE:
+
+            if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
+
+            // initial digit or one optional decimal gets appended to operand1
+            operationState.userOperand1 += dataValue;
+            console.log("Operand1 is now: ", operationState.userOperand1);
+
+            // if user clicks btn-num, move to mode OPERAND1_ACTIVE
+            calculator.currentState = STATES.OPERAND1_ACTIVE;
+
+            console.log("User inputting numbers for Operand 1...");
+            }
+            break;
+
+        case STATES.OPERAND1_ACTIVE:
+            const dataValue = event.target.getAttribute('data-value');
+
+            // every digit and one optional decimal gets appended to operand1
+            if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
+            operationState.userOperand1 += dataValue;
+            console.log("Operand1 is now: ", operationState.userOperand1);
+            }
+
+            // if user clicks operator, move to state OPERAND2_WAIT
+            if (event.target.classList.contains('btn-ops')) {
+
+                operationState.currentOperator = dataValue;
+
+                calculator.currentState = STATES.OPERAND2_WAIT;
+
+                console.log("Switching to Wait Mode for Operator: ", dataValue);
+            }
+            break;
+
+        case STATES.OPERAND2_WAIT:
+            // if the user clicks an operator, update newOperator as currentOperator
+            // if the user clicks on a button, change state to OPERAND2_ACTIVE
+            break;
+
+        case STATES.OPERAND2_ACTIVE:
+            const dataValue = event.target.getAttribute('data-value');
+
+            // every digit and an optional decimal gets appended to operand2
+             if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
+            operationState.userOperand2 += dataValue;
+            console.log("Operand1 is now: ", operationState.userOperand2);
+            }
+
+            // if decimal is clicked once already, disable decimal button
+            if (dataValue === "." && decimalUsed) return;
+
+            // if user clicks an operator, call operate(operand1, operand2, currentOperator)
+                // put that result into operand1
+                // clear operand2
+                // start newOperator as currentOperator
+            break;
+
+        case STATES.EQUALS_CLICKED:
+            // call operate(operand1, operand2, currentOperator)
+            // display result on screen
+            // if user clicks an operator, put the result of operate into operand1
+            // if user clicks an operand, call clear()
+            break;
+
+        case STATES.CLEAR_CLICKED:
+            // return state to IDLE
+            break;
+
+        default:
+            console.error("Calculator in unknown state.");
+        }
+    }
+});
 ```
 
 ### HANDLE OPERATE
@@ -224,8 +312,6 @@ Will send the values of number and operator buttons clicked to the function oper
 // Get user input from button clicks
 
 //
-
-
 ```
 
 .
@@ -346,7 +432,7 @@ calculatorButtons.addEventListener(
     // );
     // console.log(
     //   'FUNC SCOPE user operator used: ',
-    //   calculatorState.userOperatorlUsed
+    //   calculatorState.userOperatorUsed
     // );
     // console.log(
     //   'FUNC SCOPE user operator value: ',
@@ -359,15 +445,15 @@ calculatorButtons.addEventListener(
 
     if (
       event.target.classList.contains('btn-ops') &&
-      calculatorState.userOperatorlUsed === false
+      calculatorState.userOperatorUsed === false
     ) {
-      calculatorState.userOperatorlUsed = true;
+      calculatorState.userOperatorUsed = true;
       calculatorState.userOperator = event.target.getAttribute('data-value');
-      console.log('user operator clicked: ', calculatorState.userOperatorlUsed);
+      console.log('user operator clicked: ', calculatorState.userOperatorUsed);
       return console.log('user operator value: ', calculatorState.userOperator);
     } else if (
       event.target.classList.contains('btn-ops') &&
-      calculatorState.userOperatorlUsed === true
+      calculatorState.userOperatorUsed === true
     ) {
     }
   }
