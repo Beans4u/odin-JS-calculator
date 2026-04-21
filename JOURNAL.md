@@ -33,23 +33,24 @@ Starting fresh - I misunderstood some instructions three days ago when I parsed 
 
 TODO:
 
-- [] Decimals don't work in numberButtons.forEach (handleNumClickedDisplay), need to refactor.
+- [x] Decimals don't work in numberButtons.forEach (handleNumClickedDisplay), need to refactor.
   - I think this will work better if it handled display for all things based on conditions, return to calculator buttons delegation.
-- [] create calc state for chaining operations
-- [] create and wire event handler to `handleOperate` from user input
+    - [x] Implement
+- [x] create calc state for chaining operations
+- [x] create and wire event handler to handle operations from user input
 
 Once logic is complete:
 
-- [] create and wire event handler to `handleNumClickedDisplay` from user input
-- [] create and wire event handler to `handleClearDisplay` from user input
+- [] create and wire event handler from user input
+- [] create and wire event handler from user input
 - [] create and append text to the `display-screen` of result after `=` is clicked
 
 - Behaviour/testing:
   - [x] reset `displayScreen` to `0` when `clear` is clicked
-  - [] `handleOperate`: Calculations chain if the user clicks on another operator instead of the `=`
-  - [] `handleOperate`: Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
-  - [] `handleOperate`: When multiple operators are clicked, only the last one clicked is used
-  - [] disable the `.` button when used once per operand to handle that requirement. Use bool state?
+  - [x] Calculations chain if the user clicks on another operator instead of the `=`
+  - [x] Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
+  - [x] When multiple operators are clicked, only the last one clicked is used
+  - [x] disable the `.` button when used once per operand to handle that requirement. Use bool state?
 
 ### Step 6 & 7: "make it work", global error testing
 
