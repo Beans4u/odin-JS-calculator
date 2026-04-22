@@ -41,12 +41,12 @@ TODO:
 
 Once logic is complete:
 
-- [] create and wire event handler from user input
-- [] create and wire event handler from user input
-- [] create and append text to the `display-screen` of result after `=` is clicked
+- [] create and append text to the `display-screen`.
+  - [] ...of numbers typed. clearing after beginning operand2 wait mode?
+  - [] Clear then display result after `=` is clicked.
 
 - Behaviour/testing:
-  - [x] reset `displayScreen` to `0` when `clear` is clicked
+  - [] reset `displayScreen` to `0` when `clear` is clicked
   - [x] Calculations chain if the user clicks on another operator instead of the `=`
   - [x] Clicking `=` does not calculate incomplete calculations, e.g. "1 + "
   - [x] When multiple operators are clicked, only the last one clicked is used
@@ -54,15 +54,17 @@ Once logic is complete:
 
 ### Step 6 & 7: "make it work", global error testing
 
-- [] On click of equals button / chaining operators: run `operate()` using stored values.
-- [] Result becomes the next first number.
+- [x] On click of equals button / chaining operators: run `operate()` using stored values.
+- [x] Result becomes the next first number.
 - [x] long decimals are rounded (no overflow)
-- [ ] pressing `equals` with incomplete input does nothing
-- [ ] `clear` resets state and display
+- [x] pressing `equals` with incomplete input does nothing
+- [x] `clear` resets state
+- [ ] `clear` resets display
 - [x] division by zero shows 'snarky' error
-- [ ] operation only runs with: number -> operator -> number
-- [ ] repeated operators don't trigger calculation (last operator wins)
-- [ ] after displaying a result, entering a digit starts a new calculation
+  - [ ] convert to display from console log
+- [x] operation only runs with: number -> operator -> number
+- [x] repeated operators don't trigger calculation (last operator wins)
+- [x] after displaying a result, entering a digit starts a new calculation
 
 .  
 .  

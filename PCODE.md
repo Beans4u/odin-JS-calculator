@@ -175,7 +175,6 @@ const operationState = {
     userOperand1: "",
     userOperand2: "",
     currentOperator: "",
-    newOperator: "",
 }
 ```
 
@@ -183,29 +182,37 @@ const operationState = {
 
 ```JS
 const STATES = {
-    IDLE:"IDLE", // calculator hasn't been used yet
+  IDLE: 'IDLE', // calculator hasn't been used yet. The user can enter the initial number or decimal for the first operand.
+  // Allows the user to begin operations and stores the initial number or decimal in userOperand1. Exits on number or decimal clicked and begins mode OPERAND1_ACTIVE.
 
-    OPERAND1_ACTIVE: "OPERAND1_ACTIVE", // the user is entering numbers for the first operand
+  OPERAND1_ACTIVE: 'OPERAND1_ACTIVE', // the user is entering numbers and optionally a decimal into the first operand. Stores initial number or decimal in userOperand1.
+  // Gives the user space to build the first operand, and exits on operator clicked to OPERAND2_WAIT.
 
-    OPERAND2_WAIT: "OPERAND2_WAIT", // the user clicked an operator but did not enter numbers yet
+  OPERAND2_WAIT: 'OPERAND2_WAIT', // the user entered the first operand and clicked an operator, but did not enter numbers for second operand yet. Updates currentOperator if another operator button is clicked.
+  // Gives user a chance to change the operator, and exits on number or decimal clicked.
 
-    OPERAND2_ACTIVE: "OPERAND2_ACTIVE", // the user is entering numbers for the second operand
+  OPERAND2_ACTIVE: 'OPERAND2_ACTIVE', // the user is entering numbers and optionally a decimal for the second operand. On click of equals button or another operator, calls operate().
+  // Gives user a chance to build the second operand and submit the operation for calculation by clicking a second operator for chaining, or the equals sign. Exits to RESULT.
 
-    CLEAR_CLICKED: "CLEAR_CLICKED", // the user wants to start fresh
+  RESULT: 'RESULT', // the user calculated an operation, but did not yet enter additional numbers for a chained operation or clicked clear. If clear button or a number is clicked, moves to CLEAR_CLICKED to start fresh, and if an operator is clicked, returns to OPERAND2_WAIT to allow user to chain calculations. Exits on click of clear, number, or operator button.
+
+  CLEAR_CLICKED: 'CLEAR_CLICKED', // the user wants to start fresh. Clears and resets the calculator and returns to IDLE mode.
+  // Gives the user the option to start a new calculation (chain) from scratch.
 }
 ```
 
 ### FSM CONTEXT / DATA
 
-#### DECIMAL USED ONCE PER OPERAND
+#### CALCULATOR STATE, DECIMAL USED ONCE PER OPERAND
 
-**Intent:**  
+**Decimal Intent:**  
 To prevent user from submitting multiple decimals per operand, it will be disabled if it was already used once per operand.
 
 ```JS
 const calculator = {
     currentState: STATES.IDLE,
     decimalUsed: false,
+    equalsUsed: false,
 }
 ```
 
@@ -215,168 +222,187 @@ TODO: add CLEAR_CLICKED LOGIC to other states
 
 ```JS
 calculatorButtons.addEventListener('click', function handleInput(event) {
-    const dataValue = event.target.getAttribute('data-value');
+  const dataValue = event.target.getAttribute('data-value');
 
-    if (event.target.matches('[data-value="clear"]')) calculator.currentState = STATES.CLEAR_CLICKED;
+  // change mode to CLEAR_CLICKED on click of 'clear' button to reset calculator for user
+  if (event.target.matches('[data-value="clear"]'))
+    calculator.currentState = STATES.CLEAR_CLICKED;
 
-    switch (calculator.currentState) {
+  switch (calculator.currentState) {
+    case STATES.CLEAR_CLICKED:
+      // Reset states
+      calculator.currentState = STATES.IDLE;
+      calculator.equalsUsed = false;
 
-        case STATES.CLEAR_CLICKED:
-            // return state to IDLE
-            calculator.currentState = STATES.IDLE;
+      // data wipe
+      operationState.userOperand1 = '';
+      operationState.userOperand2 = '';
+      operationState.currentOperator = '';
 
-            // data wipe
-            operationState.userOperand1 = "";
-            operationState.userOperand2 = "";
-            operationState.currentOperator = "";
+      // reset bool flags
+      if (calculator.decimalUsed) calculator.decimalUsed = false;
+      if (calculator.equalsUsed) calculator.equalsUsed = false;
 
-            // if decimalUsed is true, flip to false
-            if (calculator.decimalUsed) calculator.decimalUsed = false;
+      console.log('clearing data then returning to state "IDLE"...');
 
-            // return to IDLE
-            calculator.currentState = STATES.IDLE;
+      break;
 
-            break;
-
-        default:
-            console.error("Calculator in unknown state.");
-
-        case STATES.IDLE:
-
-            if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
-
-            // if decimal is clicked once already, disable decimal button, otherwise update bool to true
-            if (dataValue === ".") {
-                if (calculator.decimalUsed) return;
-                calculator.decimalUsed = true;
-            }
-
-            // initial digit or one optional decimal gets appended to userOperand1
-            operationState.userOperand1 += dataValue;
-
-            // move to mode OPERAND1_ACTIVE
-            calculator.currentState = STATES.OPERAND1_ACTIVE;
-
-            console.log("User inputting numbers for Operand 1...");
-            console.log("Operand1 is now: ", operationState.userOperand1);
-            }
-
-            break;
-
-        case STATES.OPERAND1_ACTIVE:
-
-            // every digit and one optional decimal gets appended touserOperand1
-            if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
-
-            // if decimal is clicked once already, disable decimal button, otherwise update bool to true
-            if (dataValue === ".") {
-                if (calculator.decimalUsed) return;
-                calculator.decimalUsed = true;
-            }
-
-            operationState.userOperand1 += dataValue;
-
-            console.log("Operand1 is now: ", operationState.userOperand1);
-            }
-
-            // if user clicks operator, move to state OPERAND2_WAIT
-            if (event.target.classList.contains('btn-ops')) {
-
-                operationState.currentOperator = dataValue;
-
-                calculator.currentState = STATES.OPERAND2_WAIT;
-
-                // if decimalUsed is true, flip to false
-                if (calculator.decimalUsed) calculator.decimalUsed = false;
-
-                console.log("Switching to Wait Mode for Operator: ", dataValue);
-            }
-            break;
-
-        case STATES.OPERAND2_WAIT:
-
-            // if the user clicks an operator, update newOperator as currentOperator
-            if (event.target.classList.contains('btn-ops')) {
-
-                operationState.currentOperator = dataValue;
-
-                console.log("Operator updated to: ", dataValue);
-            }
-
-            if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
-
-            // if decimal is clicked once already, disable decimal button, otherwise update bool to true
-            if (dataValue === ".") {
-                if (calculator.decimalUsed) return;
-                calculator.decimalUsed = true;
-            }
-            // initial digit or one optional decimal gets appended to userOperand1
-            operationState.userOperand2 += dataValue;
-
-            console.log("Operand2 is now: ", operationState.userOperand2);
-
-            // if user clicks a number, move to state OPERAND2_ACTIVE
-            calculator.currentState = STATES.OPERAND2_ACTIVE;
-
-            console.log("Switching to Second Operand state...");
-
-            }
-
-            break;
-
-        case STATES.OPERAND2_ACTIVE:
-
-             if (event.target.classList.contains('btn-nums') || event.target.matches('[data-value="."]')) {
-
-                // if decimal is clicked once already, disable decimal button, otherwise update bool to true
-                if (dataValue === ".") {
-                    if (calculator.decimalUsed) return;
-                    calculator.decimalUsed = true;
-                }
-
-                // every digit and an optional decimal gets appended to userOperand2
-                operationState.userOperand2 += dataValue;
-
-                console.log("Operand2 is now: ", operationState.userOperand2);
-
-             }
-
-            if (event.target.classList.contains('btn-ops')) operationState.newOperator = dataValue;
-
-            if (dataValue === "=" || event.target.classList.contains('btn-ops')) {
-
-                // call operate(userOperand1, userOperand2, currentOperator) & put that result into userOperand1
-                operationState.userOperand1 = operate(operationState.userOperand1, operationState.userOperand2, operationState.currentOperator);
-
-                // start newOperator as currentOperator
-                operationState.currentOperator = operationState.newOperator;
-
-                // reset userOperand2 and decimal bool
-                operationState.userOperand2 = "";
-                if (calculator.decimalUsed) calculator.decimalUsed = false;
-
-                // return state to WAITING to chain calculations
-                calculator.currentState = STATES.OPERAND2_WAITING;
-            }
-
-            break;
+    case STATES.IDLE:
+      if (
+        event.target.classList.contains('btn-nums') ||
+        event.target.matches('[data-value="."]')
+      ) {
+        // prevent more than one decimal per operand
+        if (dataValue === '.') {
+          if (calculator.decimalUsed) return;
+          calculator.decimalUsed = true;
         }
-    }
+
+        // add initial digit or one optional decimal to userOperand1 for use in OPERAND1_ACTIVE mode
+        operationState.userOperand1 = dataValue;
+        console.log('Operand1 is now: ', operationState.userOperand1);
+
+        // move to mode OPERAND1_ACTIVE
+        calculator.currentState = STATES.OPERAND1_ACTIVE;
+        console.log('User inputting numbers for Operand 1...');
+      }
+
+      break;
+
+    case STATES.OPERAND1_ACTIVE:
+      // append every digit and one optional decimal to userOperand1 for use in operate() call
+      if (
+        event.target.classList.contains('btn-nums') ||
+        event.target.matches('[data-value="."]')
+      ) {
+        // prevent more than one decimal per operand
+        if (dataValue === '.') {
+          if (calculator.decimalUsed) return;
+          calculator.decimalUsed = true;
+        }
+
+        // store the first operand for use in operate() call
+        operationState.userOperand1 += dataValue;
+        console.log('Operand1 is now: ', operationState.userOperand1);
+      }
+
+      // if user clicks operator, store it for the operate() call, and move to state OPERAND2_WAIT
+      if (event.target.classList.contains('btn-ops')) {
+        operationState.currentOperator = dataValue;
+
+        // if decimalUsed is true, flip to false so it can be used in the next mode for the second operand
+        if (calculator.decimalUsed) calculator.decimalUsed = false;
+
+        // activate OPERAND2_WAIT mode to
+        calculator.currentState = STATES.OPERAND2_WAIT;
+        console.log('Switching to Wait Mode for operator: ', dataValue);
+      }
+      break;
+
+    case STATES.OPERAND2_WAIT:
+      if (event.target.classList.contains('btn-ops')) {
+        // update currentOperator so the last-clicked operator btn is used in the operation
+        operationState.currentOperator = dataValue;
+        console.log('Operator updated to: ', dataValue);
+      }
+
+      if (
+        event.target.classList.contains('btn-nums') ||
+        event.target.matches('[data-value="."]')
+      ) {
+        // prevent more than one decimal per operand
+        if (dataValue === '.') {
+          if (calculator.decimalUsed) return;
+          calculator.decimalUsed = true;
+        }
+        // initial digit or one optional decimal is added to userOperand2 for use in operate()
+        operationState.userOperand2 += dataValue;
+        console.log('Operand2 is now: ', operationState.userOperand2);
+
+        // if user clicks a number or decimal, move to state OPERAND2_ACTIVE
+        calculator.currentState = 'OPERAND2_ACTIVE';
+        console.log('User inputting numbers for operand2...');
+      }
+
+      break;
+
+    case STATES.OPERAND2_ACTIVE:
+      if (
+        event.target.classList.contains('btn-nums') ||
+        event.target.matches('[data-value="."]')
+      ) {
+        // prevent more than one decimal per operand
+        if (dataValue === '.') {
+          if (calculator.decimalUsed) return;
+          calculator.decimalUsed = true;
+        }
+
+        // every digit and an optional decimal gets appended to userOperand2 for use in operate()
+        operationState.userOperand2 += dataValue;
+        console.log('Operand2 is updated to: ', operationState.userOperand2);
+      }
+
+      // update currentOperator for use in operate() on click of operator button
+      if (event.target.classList.contains('btn-ops'))
+        operationState.currentOperator = dataValue;
+
+      if (dataValue === '=' || event.target.classList.contains('btn-ops')) {
+        // update equalsUsed bool for branching in chained operations: after equals clicked, will exit chained operation and enter CLEAR_CLICKED mode.
+        if (dataValue === '=') calculator.equalsUsed = true;
+        console.log('Equals used?', calculator.equalsUsed);
+
+        // call operate(userOperand1, userOperand2, currentOperator), and put that result into userOperand1 for chaining operations
+        console.log(
+          `Operation: ${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`
+        );
+        operationState.userOperand1 = operate(
+          operationState.userOperand1,
+          operationState.userOperand2,
+          operationState.currentOperator
+        );
+        console.log('result of operation: ', operationState.userOperand1);
+
+        // reset userOperand2 and decimal bool for use in next operand
+        operationState.userOperand2 = '';
+        if (calculator.decimalUsed) calculator.decimalUsed = false;
+        console.log(
+          'state of decimalUsed bool and userOperand2: ',
+          calculator.decimalUsed,
+          operationState.userOperand2
+        );
+      }
+
+      break;
+
+    case STATES.RESULT:
+      if (
+        calculator.equalsUsed === true &&
+        (event.target.classList.contains('btn-ops') || dataValue === '.')
+      ) {
+        console.log('equalsUsed (should be true): ', calculator.equalsUsed);
+
+        // if chaining from an equals sign, but the next button pressed is a number, clear instead.
+        calculator.currentState = STATES.CLEAR_CLICKED;
+        console.log('clearing data then returning to state "IDLE"...');
+        return;
+      } else if (event.target.classList.contains('btn-ops')) {
+        // return state to OPERAND2_WAIT to chain calculations
+        calculator.currentState = STATES.OPERAND2_WAIT;
+        console.log('Returning to Wait Mode...');
+        return;
+      }
+      break;
+
+    default:
+      console.error('Calculator in unknown state.');
+  }
 });
 ```
 
-### HANDLE OPERATE
+TODO:
 
-TODO: Work out logic
-
-Will send the values of number and operator buttons clicked to the function operate().
-
-```JS
-
-// Get user input from button clicks
-
-//
-```
+- [] Update PCODE with working code
+- [] Add a RESULTS state that branches decision for = used instead of number in chained ops
 
 .
 .
