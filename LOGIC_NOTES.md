@@ -177,9 +177,9 @@ const STATES = {
   OPERAND2_ACTIVE: 'OPERAND2_ACTIVE', // the user is entering numbers and optionally a decimal for the second operand. On click of equals button or another operator, calls operate().
   // Gives user a chance to build the second operand and submit the operation for calculation by clicking a second operator for chaining, or the equals sign. Exits to RESULT.
 
-  RESULT: 'RESULT', // the user calculated an operation, but did not yet enter additional numbers for a chained operation or clicked clear. If clear button or a number is clicked, moves to CLEAR_CLICKED to start fresh, and if an operator is clicked, returns to OPERAND2_WAIT to allow user to chain calculations. Exits on click of clear, number, or operator button.
+  RESULT: 'RESULT', // the user calculated an operation, but did not yet enter additional numbers for a chained operation or clicked clear. If clear button or a number is clicked, moves to CLEAR_CALCULATOR to start fresh, and if an operator is clicked, returns to OPERAND2_WAIT to allow user to chain calculations. Exits on click of clear, number, or operator button.
 
-  CLEAR_CLICKED: 'CLEAR_CLICKED', // the user wants to start fresh. Clears and resets the calculator and returns to IDLE mode.
+  CLEAR_CALCULATOR: 'CLEAR_CALCULATOR', // the user wants to start fresh. Clears and resets the calculator and returns to IDLE mode.
   // Gives the user the option to start a new calculation (chain) from scratch.
 }
 ```
@@ -222,19 +222,18 @@ const calculatorButtons = document.querySelector('#button-container');
 calculatorButtons.addEventListener('click', function handleInput(event) {
   const dataValue = event.target.getAttribute('data-value');
 
-  // change mode to CLEAR_CLICKED on click of 'clear' button to reset calculator for user
+  // change mode to CLEAR_CALCULATOR on click of 'clear' button to reset calculator for user
   if (event.target.matches('[data-value="clear"]'))
-    calculator.currentState = STATES.CLEAR_CLICKED;
+    calculator.currentState = STATES.CLEAR_CALCULATOR;
 
   switch (calculator.currentState) {
-    case STATES.CLEAR_CLICKED:
-      console.log('>>> STATE: CLEAR_CLICKED <<<');
+    case STATES.CLEAR_CALCULATOR:
+      console.log('>>> STATE: CLEAR_CALCULATOR <<<');
       resetCalculator();
 
       break;
 
     case STATES.IDLE:
-
       if (
         event.target.classList.contains('btn-nums') ||
         event.target.matches('[data-value="."]')
@@ -243,18 +242,15 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         if (limitDecimalsUsed(dataValue)) return;
 
         // update userOperand1 for use in OPERAND1_ACTIVE mode
-        console.log('>>> STATE: IDLE <<<');
         updateUserOperand1(dataValue);
 
         // move to mode OPERAND1_ACTIVE to continue building operand1 or select operator
-        console.log('>>> STATE: IDLE <<<');
-        changeToOperand1ActiveState();
+        changeStateToOperand1Active();
       }
 
       break;
 
     case STATES.OPERAND1_ACTIVE:
-
       if (
         event.target.classList.contains('btn-nums') ||
         event.target.matches('[data-value="."]')
@@ -263,27 +259,27 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         if (limitDecimalsUsed(dataValue)) return;
 
         // update userOperand1 for use in operate() call
-        console.log('>>> STATE: OPERAND1_ACTIVE <<<');
         updateUserOperand1(dataValue);
       }
 
       if (event.target.classList.contains('btn-ops')) {
-        // if user clicks operator, store it for the operate() call, then move to state OPERAND2_WAIT
-        console.log('>>> STATE: OPERAND1_ACTIVE <<<');
+        // if user clicks operator, store it for the operate() call, and move to state OPERAND2_WAIT
+
         updateCurrentOperator(event, dataValue);
 
         // reset decimalUsed to allow use in userOperand2
         if (calculator.decimalUsed) calculator.decimalUsed = false;
 
         // activate OPERAND2_WAIT mode to start building the second operand
-        console.log('>>> STATE: OPERAND1_ACTIVE <<<');
-        changeToOperand2WaitState();
+
+        changeStateToOperand2Wait();
       }
+
       break;
 
     case STATES.OPERAND2_WAIT:
       // ensure the last-clicked operator is used in operate() call
-      console.log('>>> STATE: OPERAND2_WAIT <<<');
+
       updateCurrentOperator(event, dataValue);
 
       if (
@@ -293,13 +289,11 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         // limit one decimal per operand
         if (limitDecimalsUsed(dataValue)) return;
 
-        // update userOperand2 with number or decimal for use in operate() call
-        console.log('>>> STATE: OPERAND2_WAIT <<<');
+        // set/update userOperand2 with number or decimal for use in operate() call
         updateUserOperand2(dataValue);
 
         // activate OPERAND2_ACTIVE to continue building operand2 or select operator
-        console.log('>>> STATE: OPERAND2_WAIT <<<');
-        changeToOperand2ActiveState();
+        changeStateToOperand2Active();
       }
 
       break;
@@ -315,46 +309,79 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         if (limitDecimalsUsed(dataValue)) return;
 
         // update userOperand2 for use in operate() call
-        console.log('>>> STATE: OPERAND2_ACTIVE <<<');
         updateUserOperand2(dataValue);
       }
 
       /// ---------- EQUALS OR OPERATOR CLICKED ------------
-
-      if (dataValue === '=' || event.target.classList.contains('btn-ops')) {
-        // Set equalsUsed to control chaining (in STATE.RESULTS, a number after '=' triggers CLEAR_CLICKED).
+      if (event.target.classList.contains('btn-ops') || dataValue === '=') {
+        // Set equalsUsed to control chaining (in STATE.RESULTS, a number after '=' triggers CLEAR_CALCULATOR).
         flipEqualsUsedToTrue(dataValue);
 
         // Set nextOperator for use in OPERAND2_WAIT if an operator was clicked
-        console.log('>>> STATE: OPERAND2_ACTIVE <<<');
         updateNextOperator(event, dataValue);
 
         // call operate(userOperand1, userOperand2, currentOperator), using userOperand1 as the new starting value for chained operations for use in OPERAND2_WAIT
-        console.log('>>> STATE: OPERAND2_ACTIVE <<<');
+
         callOperate();
 
-        // reset userOperand2 and decimal bool for use in chained operation
-        console.log('>>> STATE: OPERAND2_ACTIVE <<<');
+        // TODO: display result
+        console.log(
+          `Current state: ${calculator.currentState}
+          The result of the operation is: ${operationState.userOperand1}`
+        );
+
+        // reset userOperand2 and decimalUsed bool for use in chained operation
         resetDataForChaining();
 
-        // change to RESULT state after operate() call, on click of `=` or operator.
-        console.log('>>> STATE: OPERAND2_ACTIVE <<<');
-        changeToResultState();
+        // change to RESULT mode
+        changeStateToResult();
       }
 
       break;
 
     case STATES.RESULT:
-      if (calculator.equalsUsed === false && (event.target.classList.contains('btn-num') || event.target.matches('[data-value="."]'))) {
-        // return state to OPERAND2_WAIT to chain calculations
-        console.log('>>> STATE: RESULT <<<');
-        changeToClearClickedState(event, dataValue);
+      // return state to OPERAND2_WAIT to chain calculations on click of number or decimal if operator was used instead of equals
+      if (
+        calculator.equalsUsed === false &&
+        (event.target.classList.contains('btn-nums') ||
+          event.target.matches('[data-value="."]'))
+      ) {
+        console.log(`Current state: ${calculator.currentState}
+          User clicked ${dataValue}. Changing to OPERATION2_WAIT mode...`);
+        updateChainedOperator();
+        updateUserOperand2(dataValue);
+        changeStateToOperand2Active();
+      }
+      // if equals was used, then a new number or decimal was clicked, clear calculator to begin building a new operation.
+      if (
+        calculator.equalsUsed === true &&
+        (event.target.classList.contains('btn-nums') ||
+          event.target.matches('[data-value="."]'))
+      ) {
+        console.log(`Current state: ${calculator.currentState}
+          User clicked ${dataValue}. Changing to CLEAR_CALCULATOR mode...`);
+        calculator.equalsUsed = false;
+        changeStateToClearCalculator(event, dataValue);
+      }
+      // if equals was used, then a new operator was clicked, update the operator and chain operation.
+      if (
+        calculator.equalsUsed === true &&
+        event.target.classList.contains('btn-ops')
+      ) {
+        console.log(`Current state: ${calculator.currentState}
+          User clicked ${dataValue}. Changing to OPERATION2_WAIT mode...`);
+        calculator.equalsUsed = false;
+        updateCurrentOperator(event, dataValue);
+        changeStateToOperand2Active();
       }
 
       break;
 
     default:
-      console.error('>>> STATE: DEFAULT <<< \n An error has occurred. Calculator in DEFAULT state.');
+      console.error(
+        `Current state: ${calculator.currentState}
+        An unknown error has occurred.`
+      );
   }
 });
 ```
@@ -366,7 +393,8 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
 ```JS
 function callOperate() {
   console.log(
-    `--- callOperate() --- \n operate() called. Operation: ${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`
+    `Current state: ${calculator.currentState} | callOperate()
+    operate() called. Operation: ${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`
   );
   operationState.userOperand1 = operate(
     operationState.userOperand1,
@@ -374,8 +402,8 @@ function callOperate() {
     operationState.currentOperator
   );
   console.log(
-    '--- callOperate() --- \n result of operate() and new starting value of userOperand1: ',
-    operationState.userOperand1
+    `Current state: ${calculator.currentState} | callOperate()
+    Result of operate() and new starting value of userOperand1: ${operationState.userOperand1}`
   );
 }
 ```
@@ -386,7 +414,8 @@ function chainOperation(event) {
     // return state to OPERAND2_WAIT to chain calculations
     calculator.currentState = STATES.OPERAND2_WAIT;
     console.log(
-      '--- chainOperation(event) --- \n Returning to OPERAND2_WAIT. Waiting for user to enter first number for userOperand2...'
+      `Current state: ${calculator.currentState} | chainOperation(event)
+      Returning to OPERAND2_WAIT. Waiting for user to enter first number for userOperand2...`
     );
   }
 }
@@ -401,8 +430,7 @@ function updateCurrentOperator(event, buttonClicked) {
     // ensure the last-clicked operator is used in operate() call
     operationState.currentOperator = button;
     console.log(
-      '--- updateCurrentOperator(event, buttonClicked) --- \n User updated currentOperator to: ',
-      operationState.currentOperator
+      `Current state: ${calculator.currentState} | updateCurrentOperator(event, buttonClicked)  \n User updated currentOperator to: ${operationState.currentOperator}`
     );
   }
 }
@@ -414,22 +442,30 @@ function updateNextOperator(event, buttonClicked) {
   if (event.target.classList.contains('btn-ops')) {
     operationState.nextOperator = button;
     console.log(
-      '--- updateNextOperator(event, buttonClicked) --- \n User selected additional operator to chain operation. \n User updated nextOperator to: ',
-      operationState.nextOperator
+      `Current state: ${calculator.currentState} | updateNextOperator(event, buttonClicked)
+      User selected additional operator to chain operation.
+      User updated nextOperator to: ${operationState.nextOperator}`
     );
   }
+}
+```
+
+```JS
+function updateChainedOperator() {
+  operationState.currentOperator = operationState.nextOperator;
+  operationState.nextOperator = '';
 }
 ```
 
 #### UPDATE OPERANDS
 
 ```JS
-function updateUserOperand1(buttonClicked) {
+function updateUserOperand2(buttonClicked) {
   const button = buttonClicked;
-  operationState.userOperand1 = button;
+  operationState.userOperand2 += button;
   console.log(
-    '--- updateUserOperand1(buttonClicked) --- \n User updated number for Operand1: ',
-    operationState.userOperand1
+    `Current state: ${calculator.currentState} | updateUserOperand2(buttonClicked)
+    User updated number for Operand2: ${operationState.userOperand2}`
   );
 }
 ```
@@ -439,8 +475,8 @@ function updateUserOperand2(buttonClicked) {
   const button = buttonClicked;
   operationState.userOperand2 += button;
   console.log(
-    '--- updateUserOperand2(buttonClicked) --- \n User updated number for Operand2: ',
-    operationState.userOperand2
+    `Current state: ${calculator.currentState} | updateUserOperand2(buttonClicked)
+    User updated number for Operand2: ${operationState.userOperand2}`
   );
 }
 ```
@@ -453,9 +489,9 @@ function flipEqualsUsedToTrue(buttonClicked) {
   if (button === '=') {
     calculator.equalsUsed = true;
     console.log(
-      '--- flipEqualsUsedToTrue(buttonClicked) --- \n equalsUsed = ',
-      calculator.equalsUsed,
-      '\n User has selected equals and calculation will begin shortly...'
+      `Current state: ${calculator.currentState} | flipEqualsUsedToTrue(buttonClicked)
+      equalsUsed = ${calculator.equalsUsed}
+      User has selected equals and calculation will begin shortly...`
     );
   }
 }
@@ -479,11 +515,10 @@ function resetDataForChaining() {
   operationState.userOperand2 = '';
   if (calculator.decimalUsed) calculator.decimalUsed = false;
   console.log(
-    '--- resetDataForChaining() --- \n Resetting decimalUsed and userOperand2 to allow for chained operations... \n decimalUsed bool (must be false): ',
-    calculator.decimalUsed,
-    '\n userOperand2 -->[ ',
-    operationState.userOperand2,
-    ']<-- (must be empty): '
+    `Current state: ${calculator.currentState} | resetDataForChaining()
+    Resetting decimalUsed and userOperand2 to allow for chained operations...
+    decimalUsed bool (must be false): ${calculator.decimalUsed}
+    userOperand2 -->[${operationState.userOperand2}]<-- (must be empty).`
   );
 }
 ```
@@ -505,7 +540,8 @@ function resetCalculator() {
   if (calculator.equalsUsed) calculator.equalsUsed = false;
 
   console.log(
-    '--- resetCalculator() --- \n clearing data then returning to IDLE mode...'
+    `Current state: ${calculator.currentState} | resetCalculator()
+    clearing data then returning to IDLE mode...`
   );
 }
 ```
@@ -513,55 +549,61 @@ function resetCalculator() {
 #### CHANGE STATES
 
 ```JS
-function changeToOperand1ActiveState() {
+function changeStateToOperand1Active() {
   calculator.currentState = STATES.OPERAND1_ACTIVE;
   console.log(
-    '--- changeToOperand1ActiveState() --- \n Switching to mode OPERAND1_ACTIVE. Waiting for user to use an operator or to continue adding numbers to Operand1...'
+    `Current state: ${calculator.currentState} | changeStateToOperand1Active()
+    Switching to mode OPERAND1_ACTIVE.
+    Waiting for user to use an operator or to continue adding numbers to Operand1...`
   );
 }
 ```
 
 ```JS
-function changeToOperand2WaitState() {
-  calculator.currentState = STATES.OPERAND2_WAIT;
-  console.log(
-    '--- changeToOperand2WaitState() --- \n Switching to mode OPERAND2_WAIT. Waiting for user to enter first number for userOperand2...'
-  );
-}
-```
-
-```JS
-function changeToOperand2ActiveState() {
+function changeStateToOperand2Active() {
   calculator.currentState = STATES.OPERAND2_ACTIVE;
   console.log(
-    '--- changeToOperand2ActiveState() --- \n Switching to OPERAND2_ACTIVE mode. Waiting for user to use an operator or select more numbers for userOperand2...'
+    `Current state: ${calculator.currentState} | changeStateToOperand2Active()
+    Switching to OPERAND2_ACTIVE mode.
+    Waiting for user to use an operator or select more numbers for userOperand2...`
   );
 }
 ```
 
 ```JS
-function changeToResultState() {
+function changeStateToResult() {
   calculator.currentState = STATES.RESULT;
   console.log(
-    '--- changeToResultState() --- \n Changing to RESULT mode. Waiting for user to clear or select a new initial number for userOperand2...'
+    `Current state: ${calculator.currentState} | changeStateToResult()
+    Changing to RESULT mode.
+    If equals clicked: Waiting for user to clear or use an operator to chain operation...
+    If chained from operator: Waiting for user to clear or update userOperand2...`
   );
 }
 ```
 
 ```JS
-// TODO: not working yet. Returns to OPERAND2_WAIT when number is clicked.
-function changeToClearClickedState(event, clickedButton) {
-  if (calculator.equalsUsed === true) {
-    if (event.target.classList.contains('btn-nums') || clickedButton === '.') {
-      // clear if next button pressed is a number.
-      calculator.currentState = STATES.CLEAR_CLICKED;
+function changeStateToResult() {
+  calculator.currentState = STATES.RESULT;
+  console.log(
+    `Current state: ${calculator.currentState} | changeStateToResult()
+    Changing to RESULT mode.
+    If equals clicked: Waiting for user to clear or use an operator to chain operation...
+    If chained from operator: Waiting for user to clear or update userOperand2...`
+  );
+}
+```
 
-      console.log(
-        '--- changeToClearClickedState(event, clickedButton) --- \n Switching to CLEAR_CLICKED mode to clear data... \n equalsUsed (must be true): ',
-        calculator.equalsUsed
-      );
-    }
-  }
+```JS
+function changeStateToClearCalculator(event, clickedButton) {
+  // if equals was used, then a new number or decimal was clicked, clear calculator to begin building a new operation.
+  calculator.currentState = STATES.CLEAR_CALCULATOR;
+
+  console.log(
+    `Current state: ${calculator.currentState} | changeStateToClearCalculator(event, clickedButton)
+    equalsUsed (must be true): ${calculator.equalsUsed}
+    Switching to CLEAR_CALCULATOR mode to clear data...`
+  );
 
   return;
 }
