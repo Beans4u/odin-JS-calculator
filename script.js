@@ -53,12 +53,6 @@ function operate(num1, num2, op) {
     case OPERATOR.MULTIPLIED_BY:
       return multiplyNums(firstOperand, secondOperand);
     case OPERATOR.DIVIDED_BY:
-      if (secondOperand === 0) {
-        changeStateToClearCalculator();
-        return console.log(
-          'operate(num1, num2, op) | One does not simply divide by 0.'
-        );
-      }
       return divideNums(firstOperand, secondOperand);
     default:
       return console.log(
@@ -244,6 +238,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         // call operate(userOperand1, userOperand2, currentOperator), using userOperand1 as the new starting value for chained operations for use in OPERAND2_WAIT
 
         callOperate();
+
         // prevent operator from displaying after equals clicked
         if (buttonValue === '=') {
           operationState.currentOperator = '';
@@ -309,7 +304,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       ) {
         console.log(`Current state: ${calculator.currentState}
           User clicked ${buttonValue}. Starting new operation in OPERAND1_ACTIVE mode...`);
-        resetCalculatorFromEquals(buttonValue);
+        resetCalculatorFromResult(buttonValue);
         clearDisplay();
         displayOperation(buttonValue);
         changeStateToOperand1Active();
@@ -347,11 +342,13 @@ function callOperate() {
     `Current state: ${calculator.currentState} | callOperate()
     operate() called. Operation: ${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`
   );
+
   operationState.userOperand1 = operate(
     operationState.userOperand1,
     operationState.userOperand2,
     operationState.currentOperator
   );
+
   console.log(
     `Current state: ${calculator.currentState} | callOperate()
     Result of operate() and new starting value of userOperand1: ${operationState.userOperand1}`
@@ -470,7 +467,7 @@ function resetCalculator() {
   );
 }
 
-function resetCalculatorFromEquals(buttonClicked) {
+function resetCalculatorFromResult(buttonClicked) {
   // Reset states
   calculator.currentState = STATES.OPERAND1_ACTIVE;
   calculator.equalsUsed = false;
@@ -486,7 +483,7 @@ function resetCalculatorFromEquals(buttonClicked) {
   if (calculator.equalsUsed) calculator.equalsUsed = false;
 
   console.log(
-    `Current state: ${calculator.currentState} | resetCalculatorFromEquals(buttonClicked)
+    `Current state: ${calculator.currentState} | resetCalculatorFromResult(buttonClicked)
     User started new calculation. Clearing data then returning to OPERAND1_ACTIVE mode...
     userOperand1 is now: >>>[${buttonClicked}]<<< (must have value)`
   );
@@ -595,11 +592,14 @@ function displayResult(buttonClicked) {
   if (buttonClicked === '=')
     displayScreen.textContent = operationState.userOperand1;
 
+  if (operationState.userOperand1 == 'Infinity') {
+    return (displayScreen.textContent = 'One does not simply divide by 0!');
+  }
   if (operationState.nextOperator) {
     if (event.target.classList.contains('btn-ops'))
-      displayScreen.textContent = `${operationState.userOperand1} ${operationState.nextOperator}`;
+      return (displayScreen.textContent = `${operationState.userOperand1} ${operationState.nextOperator}`);
   } else if (operationState.nextOperator === '') {
-    displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator}`;
+    return (displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator}`);
   }
 }
 
@@ -639,7 +639,7 @@ function addZeroOperand1(buttonClicked) {
     ) {
       operationState.userOperand1 = '0.';
       console.log(`Current state: ${calculator.currentState} | addZeroOperand1(buttonClicked) 
-    Adding leading 0. userOperand1 should now lead with zero: >>>[${operationState.userOperand2}]<<< (should be '0.')`);
+    Adding leading 0. userOperand1 should now lead with zero: >>>[${operationState.userOperand1}]<<< (should be '0.')`);
     } else {
       operationState.userOperand1 = buttonClicked;
     }
