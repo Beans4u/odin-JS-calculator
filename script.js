@@ -308,9 +308,11 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
           event.target.matches('[data-value="."]'))
       ) {
         console.log(`Current state: ${calculator.currentState}
-          User clicked ${buttonValue}. Changing to CLEAR_CALCULATOR mode...`);
-        calculator.equalsUsed = false;
-        changeStateToClearCalculator(buttonValue);
+          User clicked ${buttonValue}. Starting new operation in OPERAND1_ACTIVE mode...`);
+        resetCalculatorFromEquals(buttonValue);
+        clearDisplay();
+        displayOperation(buttonValue);
+        changeStateToOperand1Active();
       }
       // if equals was used, then a new operator was clicked, update the operator and chain operation.
       if (
@@ -468,6 +470,28 @@ function resetCalculator() {
   );
 }
 
+function resetCalculatorFromEquals(buttonClicked) {
+  // Reset states
+  calculator.currentState = STATES.OPERAND1_ACTIVE;
+  calculator.equalsUsed = false;
+
+  // data wipe
+  addZeroOperand1(buttonClicked); // if decimal clicked, adds a zero in front of it, otherwise uses number value clicked.
+  operationState.userOperand2 = '0';
+  operationState.currentOperator = '';
+  operationState.nextOperator = '';
+
+  // reset bool flags
+  if (calculator.decimalUsed) calculator.decimalUsed = false;
+  if (calculator.equalsUsed) calculator.equalsUsed = false;
+
+  console.log(
+    `Current state: ${calculator.currentState} | resetCalculatorFromEquals(buttonClicked)
+    User started new calculation. Clearing data then returning to OPERAND1_ACTIVE mode...
+    userOperand1 is now: >>>[${buttonClicked}]<<< (must have value)`
+  );
+}
+
 // - - - - - CHANGE STATES - - - - - -
 
 // - - - OPERANDS - - - -
@@ -600,8 +624,24 @@ function clearZeroOperand1(buttonClicked) {
     ) {
       displayScreen.textContent = '';
       operationState.userOperand1 = '';
-      console.log(`Current state: ${calculator.currentState} | clearZeroOperand1() 
+      console.log(`Current state: ${calculator.currentState} | clearZeroOperand1(buttonClicked) 
     Clearing leading 0. userOperand2 should now lead with non-zero number: >>>[${operationState.userOperand2}]<<< (should be empty)`);
+    }
+  }
+}
+
+function addZeroOperand1(buttonClicked) {
+  // ensure operator and equals buttons don't clear the screen
+  if (event.target.classList.contains('btn-nums') || buttonClicked === '.') {
+    if (
+      // add a leading '0' in front of the decimal on the displayScreen so the user will see 0.# rather than .#
+      buttonClicked === '.'
+    ) {
+      operationState.userOperand1 = '0.';
+      console.log(`Current state: ${calculator.currentState} | addZeroOperand1(buttonClicked) 
+    Adding leading 0. userOperand1 should now lead with zero: >>>[${operationState.userOperand2}]<<< (should be '0.')`);
+    } else {
+      operationState.userOperand1 = buttonClicked;
     }
   }
 }
@@ -612,7 +652,7 @@ function clearZeroOperand2(buttonClicked) {
     operationState.userOperand2 === '0'
   ) {
     displayScreen.textContent += '0';
-    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2() 
+    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2(buttonClicked) 
     Keeping leading 0. Display should now show leading 0: ${operationState.userOperand2}`);
   }
 
