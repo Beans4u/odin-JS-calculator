@@ -118,6 +118,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
   if (event.target.matches('[data-value="clear"]'))
     calculator.currentState = STATES.CLEAR_CALCULATOR;
 
+  // + + + FSM SWITCH STATEMENT + + +
   switch (calculator.currentState) {
     case STATES.CLEAR_CALCULATOR:
       resetCalculator();
@@ -178,12 +179,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       break;
 
     case STATES.OPERAND2_WAIT:
-      // limit one decimal per operand
-      if (limitDecimalsUsed(buttonValue)) return;
-
-      // displayScreen to keep 0 placeholder in userOperand1 and userOperand2 if `0` or `.` are the first buttons clicked.
-      clearZeroOperand2(buttonValue);
-
       if (event.target.classList.contains('btn-ops')) {
         // ensure the last-clicked operator is used in operate() call
         updateCurrentOperator(buttonValue);
@@ -194,9 +189,20 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         event.target.classList.contains('btn-nums') ||
         event.target.matches('[data-value="."]')
       ) {
+        // limit one decimal per operand
+        if (limitDecimalsUsed(buttonValue)) return;
+
+        // displayScreen to keep 0 placeholder in userOperand1 and userOperand2 if `0` or `.` are the first buttons clicked.
+        clearZeroOperand2(buttonValue);
+        addZeroOperand2(buttonValue);
+
+        // display leading zero / decimal if not cleared
+        displayOperation(buttonValue);
+
         // set/update userOperand2 with number or decimal for use in operate() call
         updateUserOperand2(buttonValue);
 
+        // display updated userOperand2
         displayOperation(buttonValue);
 
         // activate OPERAND2_ACTIVE state to continue building operand2 or select operator
@@ -648,23 +654,24 @@ function addZeroOperand1(buttonClicked) {
 
 function clearZeroOperand2(buttonClicked) {
   if (
-    (buttonClicked === '0' || buttonClicked === '.') &&
-    operationState.userOperand2 === '0'
-  ) {
-    displayScreen.textContent += '0';
-    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2(buttonClicked) 
-    Keeping leading 0. Display should now show leading 0: ${operationState.userOperand2}`);
-  }
-
-  if (
-    (buttonClicked !== 0 || buttonClicked !== '.') &&
+    (buttonClicked !== '0' || buttonClicked !== '.') &&
     operationState.userOperand2.length === 1 &&
     operationState.userOperand2 === '0' &&
     buttonClicked !== '.'
   ) {
-    // displayScreen.textContent = '';
     operationState.userOperand2 = '';
     console.log(`Current state: ${calculator.currentState} | clearZeroOperand2() 
     Clearing leading 0. userOperand2 should now lead with non-zero number: >>>[${operationState.userOperand2}]<<< (should be empty)`);
+  }
+}
+
+function addZeroOperand2(buttonClicked) {
+  if (
+    (buttonClicked === '0' || buttonClicked === '.') &&
+    operationState.userOperand2 === '0'
+  ) {
+    operationState.userOperand2 = '0';
+    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2(buttonClicked) 
+    Keeping leading 0 for decimal. Display should now show '0.': ${operationState.userOperand2}`);
   }
 }
