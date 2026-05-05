@@ -1,26 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Lora:wght@400;600&display=swap');
 
-/* GLOBAL COLOURS */
+/* + + + + + STYLING: GLOBAL RESET + + + + + */
 
-:root {
-  --body: #f3efe6;
-  --chassis: #53514a;
-  --display-screen: #858173;
-  --btn-nums: #a3b18a;
-  --btn-ops: #c97b63;
-  --btn-controls: #e6d5b8;
-  --text-heading: #2b1f1b;
-  --text-body: #4a3b33;
-  --text-button: #2b1f1b;
+/* Box sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
-/* STYLING: GLOBAL RESET */
+
+/* Remove default margin/padding */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Improve text rendering */
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* global button reset */
 button {
   all: unset;
-  box-sizing: border-box;
   cursor: pointer;
 }
 
-/* STYLING: TEXT & FONTS */
+/* + + + + + STYLING: GLOBAL COLOURS + + + + + */
+
+:root {
+  --body: #d1d2c8;
+  --chassis: #53514a;
+  --display-screen: #858173;
+  --btn-nums: #95a37e;
+  --btn-ops: #c97b63;
+  --btn-controls: #e6d5b8;
+  --text-heading: #5d362a;
+  --text-body: #4d3d34;
+  --text-button: #42302b;
+}
+
+/* + + + + + STYLING: TEXT & FONTS + + + + + */
 h1 {
   color: var(--text-heading);
   font-family: 'Lora', serif;
@@ -28,7 +49,7 @@ h1 {
 }
 p {
   color: var(--text-body);
-  font-size: 18px;
+  font-size: 16px;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
 }
@@ -36,24 +57,26 @@ p {
 button {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
+  font-size: 20px;
 }
 
 /* STYLING: COLOURS, ROUNDED CORNERS */
 body {
-  padding: 0 30px;
+  padding: 10px 30px;
   background-color: var(--body);
 }
 #calc-chassis {
   background-color: var(--chassis);
-  border-radius: 10px;
-  padding: 30px;
+  border-radius: 20px;
+  padding: 40px 15px;
 }
 #display-screen {
   background-color: var(--display-screen);
   padding: 20px;
+  border-radius: 3px;
 }
 button {
-  border-radius: 20px;
+  border-radius: 10px;
   text-align: center;
   color: var(--text-button);
 }
@@ -67,14 +90,41 @@ button {
   background-color: var(--btn-controls);
 }
 
-/* TEMP LAYOUT FOR VISUALIZATION PURPOSES - REMOVE BEFORE FLEXBOX IS IMPLEMENTED */
+/* + + + + + + + LAYOUT: FLEXBOX & SIZING + + + + + + + */
 
 #calc-chassis {
-  width: 275px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 350px;
+  margin-top: 40px;
+
+  /* control for overflow, part 1 */
+  justify-content: flex-end;
 }
+
 #display-screen {
   width: 85%;
+
+  /* control for overflow, part 2 */
+  float: right;
+  text-align: end;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
+
+#button-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 85%;
+}
+
 button {
   width: 60px;
   height: 60px;
