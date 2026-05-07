@@ -220,13 +220,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         // prevent operator from displaying after equals clicked
         if (buttonValue === '=') {
           operationState.currentOperator = '';
-          console.log(
-            `Current state: ${calculator.currentState}
-            User selected equals.
-            resetting operators...
-            nextOperator: >>>[${operationState.nextOperator}]<<< (must be empty)
-            currentOperator: >>>[${operationState.currentOperator}]<<< (must be empty)`
-          );
         }
         displayResult(buttonValue);
 
@@ -258,17 +251,9 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         (event.target.classList.contains('btn-nums') ||
           event.target.matches('[data-value="."]'))
       ) {
-        console.log(`Current state: ${calculator.currentState}
-          User updated userOperand2 to: ${buttonValue}. Changing to OPERATION2_ACTIVE mode...`);
         addLeadingZeroOperand2(buttonValue);
         updateUserOperand2(buttonValue);
         displayOperation(buttonValue);
-        console.log(
-          `Current state: ${calculator.currentState} | Displaying operation
-            User selected number or decimal for userOperand2. Checking operators...
-            nextOperator: >>>[${operationState.nextOperator}]<<< (must be empty)
-            currentOperator: >>>[${operationState.currentOperator}]<<< (must have value)`
-        );
         changeStateToOperand2Active();
       }
       // if equals was clicked, followed by a number or decimal, clear calculator to begin building a new operation.
@@ -277,8 +262,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         (event.target.classList.contains('btn-nums') ||
           event.target.matches('[data-value="."]'))
       ) {
-        console.log(`Current state: ${calculator.currentState}
-          User clicked ${buttonValue}. Starting new operation in OPERAND1_ACTIVE mode...`);
         resetCalculatorFromResult(buttonValue);
         clearDisplay();
         displayOperation(buttonValue);
@@ -289,8 +272,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         calculator.equalsUsed === true &&
         event.target.classList.contains('btn-ops')
       ) {
-        console.log(`Current state: ${calculator.currentState}
-          User clicked ${buttonValue}. Changing to OPERATION2_WAIT mode...`);
         calculator.equalsUsed = false;
         updateCurrentOperator(buttonValue);
         displayOperation(buttonValue);
@@ -312,20 +293,10 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
 // - - - OPERATIONS - - - -
 
 function callOperate() {
-  console.log(
-    `Current state: ${calculator.currentState} | callOperate()
-    operate() called. Operation: ${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`
-  );
-
   operationState.userOperand1 = operate(
     operationState.userOperand1,
     operationState.userOperand2,
     operationState.currentOperator
-  );
-
-  console.log(
-    `Current state: ${calculator.currentState} | callOperate()
-    Result of operate() and new starting value of userOperand1: ${operationState.userOperand1}`
   );
 }
 
@@ -335,51 +306,28 @@ function updateCurrentOperator(buttonClicked) {
   if (event.target.classList.contains('btn-ops')) {
     // ensure the last-clicked operator is used in operate() call
     operationState.currentOperator = buttonClicked;
-    console.log(
-      `Current state: ${calculator.currentState} | updateCurrentOperator(buttonClicked)  \n User updated currentOperator to: ${operationState.currentOperator}`
-    );
   }
 }
 
 function updateNextOperator(buttonClicked) {
   if (event.target.classList.contains('btn-ops')) {
     operationState.nextOperator = buttonClicked;
-    console.log(
-      `Current state: ${calculator.currentState} | updateNextOperator(buttonClicked)
-      User selected additional operator to chain operation.
-      User updated nextOperator to: ${operationState.nextOperator}`
-    );
   }
 }
 
 function updateChainedOperator() {
   operationState.currentOperator = operationState.nextOperator;
   operationState.nextOperator = '';
-  console.log(
-    `Current state: ${calculator.currentState} | updateChainedOperator(buttonClicked)
-      User selected additional operator in chained operation.
-      nextOperator handed off to currentOperator.
-      nextOperator: >>>[${operationState.nextOperator}]<<< (must be empty)
-      currentOperator: ${operationState.currentOperator}`
-  );
 }
 
 // - - - UPDATE OPERANDS - - - -
 
 function updateUserOperand1(buttonClicked) {
   operationState.userOperand1 += buttonClicked;
-  console.log(
-    `Current state: ${calculator.currentState} | updateUserOperand1(buttonClicked)
-    User updated number for Operand1: ${operationState.userOperand1}`
-  );
 }
 
 function updateUserOperand2(buttonClicked) {
   operationState.userOperand2 += buttonClicked;
-  console.log(
-    `Current state: ${calculator.currentState} | updateUserOperand2(buttonClicked)
-    User updated number for Operand2: ${operationState.userOperand2}`
-  );
 }
 
 // - - - UPDATE BOOLS - - - -
@@ -387,11 +335,6 @@ function updateUserOperand2(buttonClicked) {
 function flipEqualsUsedToTrue(buttonClicked) {
   if (buttonClicked === '=') {
     calculator.equalsUsed = true;
-    console.log(
-      `Current state: ${calculator.currentState} | flipEqualsUsedToTrue(buttonClicked)
-      equalsUsed = ${calculator.equalsUsed}
-      User has selected equals and calculation will begin shortly...`
-    );
   }
 }
 
@@ -400,9 +343,6 @@ function limitDecimalsUsed(buttonClicked) {
   if (buttonClicked === '.') {
     if (calculator.decimalUsed) return true;
     calculator.decimalUsed = true;
-    console.log(`Current state: ${calculator.currentState} | limitDecimalsUsed(buttonClicked)
-    User has selected decimal. 
-    decimalUsed updated to (should be true): ${calculator.decimalUsed}`);
   }
   return false;
 }
@@ -412,12 +352,6 @@ function limitDecimalsUsed(buttonClicked) {
 function resetDataForChaining() {
   operationState.userOperand2 = '';
   if (calculator.decimalUsed) calculator.decimalUsed = false;
-  console.log(
-    `Current state: ${calculator.currentState} | resetDataForChaining()
-    Resetting decimalUsed and userOperand2 to allow for chained operations...
-    decimalUsed bool (must be false): ${calculator.decimalUsed}
-    userOperand2 -->[${operationState.userOperand2}]<-- (must be empty).`
-  );
 }
 
 function resetCalculator() {
@@ -434,11 +368,6 @@ function resetCalculator() {
   // reset bool flags
   if (calculator.decimalUsed) calculator.decimalUsed = false;
   if (calculator.equalsUsed) calculator.equalsUsed = false;
-
-  console.log(
-    `Current state: ${calculator.currentState} | resetCalculator()
-    clearing data then returning to IDLE mode...`
-  );
 }
 
 function resetCalculatorFromResult(buttonClicked) {
@@ -455,12 +384,6 @@ function resetCalculatorFromResult(buttonClicked) {
   // reset bool flags
   if (calculator.decimalUsed) calculator.decimalUsed = false;
   if (calculator.equalsUsed) calculator.equalsUsed = false;
-
-  console.log(
-    `Current state: ${calculator.currentState} | resetCalculatorFromResult(buttonClicked)
-    User started new calculation. Clearing data then returning to OPERAND1_ACTIVE mode...
-    userOperand1 is now: >>>[${buttonClicked}]<<< (must have value)`
-  );
 }
 
 // - - - - - CHANGE STATES - - - - - -
@@ -469,41 +392,20 @@ function resetCalculatorFromResult(buttonClicked) {
 
 function changeStateToOperand1Active() {
   calculator.currentState = STATES.OPERAND1_ACTIVE;
-  console.log(
-    `Current state: ${calculator.currentState} | changeStateToOperand1Active()
-    Switching to mode OPERAND1_ACTIVE.
-    Waiting for user to use an operator or to continue adding numbers to Operand1...`
-  );
 }
 
 function changeStateToOperand2Wait() {
   calculator.currentState = STATES.OPERAND2_WAIT;
-  console.log(
-    `Current state: ${calculator.currentState} | changeStateToOperand2Wait()
-    Switching to mode OPERAND2_WAIT.
-    Waiting for user to update userOperand2 or use an operator...`
-  );
 }
 
 function changeStateToOperand2Active() {
   calculator.currentState = STATES.OPERAND2_ACTIVE;
-  console.log(
-    `Current state: ${calculator.currentState} | changeStateToOperand2Active()
-    Switching to OPERAND2_ACTIVE mode.
-    Waiting for user to use an operator or select more numbers for userOperand2...`
-  );
 }
 
 // - - - RESULT - - - -
 
 function changeStateToResult() {
   calculator.currentState = STATES.RESULT;
-  console.log(
-    `Current state: ${calculator.currentState} | changeStateToResult()
-    Changing to RESULT mode.
-    If equals clicked: Waiting for user to clear or use an operator to chain operation...
-    If chained from operator: Waiting for user to update userOperand2 or select operator...`
-  );
 }
 
 // + + + + + + DISPLAY SCREEN + + + + + + +
@@ -583,8 +485,6 @@ function displayResult(buttonClicked) {
 
 function clearDisplay() {
   displayScreen.textContent = '0';
-  console.log(`Current state: ${calculator.currentState} | clearDisplay()
-    Clearing display.`);
 }
 
 // - - - CLEAR ZERO IF NON-ZERO ENTERED FIRST - - - -
@@ -597,8 +497,6 @@ function clearStartingZeroOperand1(buttonClicked) {
       operationState.userOperand1 === '0'
     ) {
       operationState.userOperand1 = '';
-      console.log(`Current state: ${calculator.currentState} | clearStartingZeroOperand1(buttonClicked)
-    Clearing leading 0. userOperand1 should now lead with non-zero number: >>>[${operationState.userOperand1}]<<< (should be empty)`);
     }
   }
 }
@@ -611,8 +509,6 @@ function addLeadingZeroOperand1(buttonClicked) {
     buttonClicked === '.'
   ) {
     operationState.userOperand1 = '0.';
-    console.log(`Current state: ${calculator.currentState} | addLeadingZeroOperand1(buttonClicked)
-    Adding leading 0. userOperand1 should now lead with zero and decimal: >>>[${operationState.userOperand1}]<<< (should be '0.')`);
   } else {
     operationState.userOperand1 = buttonClicked;
   }
@@ -622,8 +518,5 @@ function addLeadingZeroOperand2(buttonClicked) {
   // add a leading '0' in front of the decimal so the user will see '0.#' rather than '.#'
   if (buttonClicked === '.' && operationState.userOperand2 === '') {
     operationState.userOperand2 = '0';
-
-    console.log(`Current state: ${calculator.currentState} | addLeadingZeroOperand2(buttonClicked)
-    Adding leading 0. userOperand2 should now lead with zero: >>>[${operationState.userOperand2}]<<< (should be '0.')`);
   }
 }
