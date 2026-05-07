@@ -4,23 +4,19 @@
 
 function addNums(num1, num2) {
   const result = num1 + num2;
-  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
-  return rounded;
+  return result;
 }
 function subtractNums(num1, num2) {
   const result = num1 - num2;
-  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
-  return rounded;
+  return result;
 }
 function multiplyNums(num1, num2) {
   const result = num1 * num2;
-  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
-  return rounded;
+  return result;
 }
 function divideNums(num1, num2) {
   const result = num1 / num2;
-  const rounded = Math.round((result + Number.EPSILON) * 100) / 100;
-  return rounded;
+  return result;
 }
 
 // - - - OPERATORS FOR DISPATCH IN operate() - - - -
@@ -40,9 +36,7 @@ function operate(num1, num2, op) {
 
   // short-circuit if invalid number
   if (Number.isNaN(firstOperand) || Number.isNaN(secondOperand)) {
-    return console.log(
-      'operate(num1, num2, op) | Error catch: Please enter a valid number'
-    ); //placeholder error handling, will be updated to append to UI
+    return;
   }
 
   switch (op) {
@@ -55,9 +49,7 @@ function operate(num1, num2, op) {
     case OPERATOR.DIVIDED_BY:
       return divideNums(firstOperand, secondOperand);
     default:
-      return console.log(
-        'operate(num1, num2, op) | SWITCH default: there was an error'
-      ); // TODO: placeholder error handling, will be updated to append to UI
+      return (displayScreen.textContent = 'there was an error');
   }
 }
 
@@ -80,17 +72,14 @@ const STATES = {
   OPERAND2_ACTIVE: 'OPERAND2_ACTIVE', // the user is entering numbers and optionally a decimal for the second operand. On click of equals button or another operator, calls operate().
   // Gives user a chance to build the second operand and submit the operation for calculation by clicking a second operator for chaining, or the equals sign. Exits to RESULT.
 
-  RESULT: 'RESULT', // the user calculated an operation, but did not yet enter additional numbers for a chained operation or clicked clear. If clear button or a number is clicked, moves to CLEAR_CALCULATOR to start fresh, and if the operation is chained, returns to OPERAND2_ACTIVE to continue building userOperand2. Exits on click of clear, number, or operator button.
-
-  CLEAR_CALCULATOR: 'CLEAR_CALCULATOR', // the user wants to start fresh. Clears and resets the calculator, then returns to IDLE mode.
-  // Gives the user the option to start a new calculation (chain) from scratch.
+  RESULT: 'RESULT', // the user calculated an operation, but did not yet enter additional numbers for a chained operation or clicked clear. If equals was used, number input starts a new operation in OPERAND1_ACTIVE. If an operator chained the calculation, number input continues chaining in OPERAND2_ACTIVE.
 };
 
 // - - - OPERATION DATA - - - -
 
 const operationState = {
   userOperand1: '0',
-  userOperand2: '0',
+  userOperand2: '',
   currentOperator: '',
   nextOperator: '',
 };
@@ -112,20 +101,16 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
   const buttonValue = event.target.getAttribute('data-value');
 
   // clear '0' from userOperand1 if the user starts with a non-zero number.
-  clearZeroOperand1(buttonValue);
+  clearStartingZeroOperand1(buttonValue);
 
-  // change mode to CLEAR_CALCULATOR on click of 'clear' button to reset calculator for user
-  if (event.target.matches('[data-value="clear"]'))
-    calculator.currentState = STATES.CLEAR_CALCULATOR;
+  // when 'clear' clicked, reset calculator
+  if (event.target.matches('[data-value="clear"]')) {
+    resetCalculator();
+    clearDisplay();
+  }
 
   // + + + FSM SWITCH STATEMENT + + +
   switch (calculator.currentState) {
-    case STATES.CLEAR_CALCULATOR:
-      resetCalculator();
-      clearDisplay();
-
-      break;
-
     case STATES.IDLE:
       // limit one decimal per operand
       if (limitDecimalsUsed(buttonValue)) return;
@@ -148,13 +133,13 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       break;
 
     case STATES.OPERAND1_ACTIVE:
-      // limit one decimal per operand
-      if (limitDecimalsUsed(buttonValue)) return;
-
       if (
         event.target.classList.contains('btn-nums') ||
         event.target.matches('[data-value="."]')
       ) {
+        // limit one decimal per operand
+        if (limitDecimalsUsed(buttonValue)) return;
+
         // update userOperand1 for use in operate() call
         updateUserOperand1(buttonValue);
 
@@ -165,8 +150,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       if (event.target.classList.contains('btn-ops')) {
         // if user clicks operator, store it for the operate() call, and move to state OPERAND2_WAIT
         updateCurrentOperator(buttonValue);
-
-        // display updated operator
         displayOperation(buttonValue);
 
         // reset decimalUsed to allow use in userOperand2
@@ -192,17 +175,11 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         // limit one decimal per operand
         if (limitDecimalsUsed(buttonValue)) return;
 
-        // displayScreen to keep 0 placeholder in userOperand1 and userOperand2 if `0` or `.` are the first buttons clicked.
-        clearZeroOperand2(buttonValue);
-        addZeroOperand2(buttonValue);
+        // displayScreen to add a leading 0 if `0` or `.` are the first buttons entered into userOperand2.
+        addLeadingZeroOperand2(buttonValue);
 
-        // display leading zero / decimal if not cleared
-        displayOperation(buttonValue);
-
-        // set/update userOperand2 with number or decimal for use in operate() call
+        // update userOperand2 with number or decimal for use in operate() call
         updateUserOperand2(buttonValue);
-
-        // display updated userOperand2
         displayOperation(buttonValue);
 
         // activate OPERAND2_ACTIVE state to continue building operand2 or select operator
@@ -212,21 +189,17 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       break;
 
     case STATES.OPERAND2_ACTIVE:
-      // limit one decimal per operand
-      if (limitDecimalsUsed(buttonValue)) return;
-
-      // displayScreen to keep 0 placeholder in userOperand1 and userOperand2 if `0` or `.` are the first buttons clicked.
-      clearZeroOperand2(buttonValue);
-
       /// ---------- NUMBER OR DECIMAL CLICKED ------------
       if (
         event.target.classList.contains('btn-nums') ||
         event.target.matches('[data-value="."]')
       ) {
-        // update userOperand2 for use in operate() call
-        updateUserOperand2(buttonValue);
+        // limit one decimal per operand
+        if (limitDecimalsUsed(buttonValue)) return;
 
-        //display updated userOperand2
+        // displayScreen to add a leading 0 if `0` or `.` are the first buttons entered into userOperand2.
+        addLeadingZeroOperand2(buttonValue);
+        updateUserOperand2(buttonValue);
         displayOperation(buttonValue);
       }
 
@@ -235,14 +208,13 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       if (event.target.classList.contains('btn-ops') || buttonValue === '=') {
         clearDisplay();
 
-        // Set equalsUsed to control chaining (in STATES.RESULT, a number after '=' triggers CLEAR_CALCULATOR).
+        // Set equalsUsed to control chaining (in STATES.RESULT, a number or decimal after '=' clears calculator).
         flipEqualsUsedToTrue(buttonValue);
 
-        // Set nextOperator for use in OPERAND2_WAIT if an operator was clicked
+        // Store nextOperator for chained operations in RESULT state
         updateNextOperator(buttonValue);
 
         // call operate(userOperand1, userOperand2, currentOperator), using userOperand1 as the new starting value for chained operations for use in OPERAND2_WAIT
-
         callOperate();
 
         // prevent operator from displaying after equals clicked
@@ -268,7 +240,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       break;
 
     case STATES.RESULT:
-      // clear nextOperand before sending back to OPERAND2_ACTIVE if user chains operation, which otherwise would conflict with display logic.
+      // clear nextOperand before changing state to OPERAND2_ACTIVE if user chains operation, which otherwise would conflict with display logic.
       updateChainedOperator();
 
       // limit one decimal per operand
@@ -277,7 +249,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       // ensure the last-clicked operator is used in operate() call
       if (event.target.classList.contains('btn-ops')) {
         updateCurrentOperator(buttonValue);
-
         displayOperation(buttonValue);
       }
 
@@ -289,10 +260,8 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
       ) {
         console.log(`Current state: ${calculator.currentState}
           User updated userOperand2 to: ${buttonValue}. Changing to OPERATION2_ACTIVE mode...`);
-        clearZeroOperand2(buttonValue);
-        // updateChainedOperator();
+        addLeadingZeroOperand2(buttonValue);
         updateUserOperand2(buttonValue);
-        // display updated userOperand2
         displayOperation(buttonValue);
         console.log(
           `Current state: ${calculator.currentState} | Displaying operation
@@ -302,7 +271,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         );
         changeStateToOperand2Active();
       }
-      // if equals was used, then a number or decimal was clicked, clear calculator to begin building a new operation.
+      // if equals was clicked, followed by a number or decimal, clear calculator to begin building a new operation.
       if (
         calculator.equalsUsed === true &&
         (event.target.classList.contains('btn-nums') ||
@@ -315,7 +284,7 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         displayOperation(buttonValue);
         changeStateToOperand1Active();
       }
-      // if equals was used, then a new operator was clicked, update the operator and chain operation.
+      // if equals was clicked, followed by a new operator, continue chaining from the result.
       if (
         calculator.equalsUsed === true &&
         event.target.classList.contains('btn-ops')
@@ -323,7 +292,6 @@ calculatorButtons.addEventListener('click', function handleInput(event) {
         console.log(`Current state: ${calculator.currentState}
           User clicked ${buttonValue}. Changing to OPERATION2_WAIT mode...`);
         calculator.equalsUsed = false;
-
         updateCurrentOperator(buttonValue);
         displayOperation(buttonValue);
         changeStateToOperand2Active();
@@ -442,13 +410,13 @@ function limitDecimalsUsed(buttonClicked) {
 // - - - RESET DATA - - - -
 
 function resetDataForChaining() {
-  operationState.userOperand2 = '0';
+  operationState.userOperand2 = '';
   if (calculator.decimalUsed) calculator.decimalUsed = false;
   console.log(
     `Current state: ${calculator.currentState} | resetDataForChaining()
     Resetting decimalUsed and userOperand2 to allow for chained operations...
     decimalUsed bool (must be false): ${calculator.decimalUsed}
-    userOperand2 -->[${operationState.userOperand2}]<-- (must be zero).`
+    userOperand2 -->[${operationState.userOperand2}]<-- (must be empty).`
   );
 }
 
@@ -459,7 +427,7 @@ function resetCalculator() {
 
   // data wipe
   operationState.userOperand1 = '0';
-  operationState.userOperand2 = '0';
+  operationState.userOperand2 = '';
   operationState.currentOperator = '';
   operationState.nextOperator = '';
 
@@ -479,8 +447,8 @@ function resetCalculatorFromResult(buttonClicked) {
   calculator.equalsUsed = false;
 
   // data wipe
-  addZeroOperand1(buttonClicked); // if decimal clicked, adds a zero in front of it, otherwise uses number value clicked.
-  operationState.userOperand2 = '0';
+  addLeadingZeroOperand1(buttonClicked); // allows decimal and zero as first numbers from RESULT state
+  operationState.userOperand2 = '';
   operationState.currentOperator = '';
   operationState.nextOperator = '';
 
@@ -503,7 +471,7 @@ function changeStateToOperand1Active() {
   calculator.currentState = STATES.OPERAND1_ACTIVE;
   console.log(
     `Current state: ${calculator.currentState} | changeStateToOperand1Active()
-    Switching to mode OPERAND1_ACTIVE. 
+    Switching to mode OPERAND1_ACTIVE.
     Waiting for user to use an operator or to continue adding numbers to Operand1...`
   );
 }
@@ -512,7 +480,7 @@ function changeStateToOperand2Wait() {
   calculator.currentState = STATES.OPERAND2_WAIT;
   console.log(
     `Current state: ${calculator.currentState} | changeStateToOperand2Wait()
-    Switching to mode OPERAND2_WAIT. 
+    Switching to mode OPERAND2_WAIT.
     Waiting for user to update userOperand2 or use an operator...`
   );
 }
@@ -521,34 +489,21 @@ function changeStateToOperand2Active() {
   calculator.currentState = STATES.OPERAND2_ACTIVE;
   console.log(
     `Current state: ${calculator.currentState} | changeStateToOperand2Active()
-    Switching to OPERAND2_ACTIVE mode. 
+    Switching to OPERAND2_ACTIVE mode.
     Waiting for user to use an operator or select more numbers for userOperand2...`
   );
 }
 
-// - - - RESULT & CLEAR_CALCULATOR - - - -
+// - - - RESULT - - - -
 
 function changeStateToResult() {
   calculator.currentState = STATES.RESULT;
   console.log(
     `Current state: ${calculator.currentState} | changeStateToResult()
-    Changing to RESULT mode. 
+    Changing to RESULT mode.
     If equals clicked: Waiting for user to clear or use an operator to chain operation...
-    If chained from operator: Waiting for user to clear or update userOperand2...`
+    If chained from operator: Waiting for user to update userOperand2 or select operator...`
   );
-}
-
-function changeStateToClearCalculator() {
-  // if equals was used, then a new number or decimal was clicked, clear calculator to begin building a new operation.
-  calculator.currentState = STATES.CLEAR_CALCULATOR;
-
-  console.log(
-    `Current state: ${calculator.currentState} | changeStateToClearCalculator()
-    equalsUsed (must be true): ${calculator.equalsUsed}
-    Switching to CLEAR_CALCULATOR mode to clear data...`
-  );
-
-  return;
 }
 
 // + + + + + + DISPLAY SCREEN + + + + + + +
@@ -563,28 +518,36 @@ function displayOperation(buttonClicked) {
   // prevent equals from displaying
   if (buttonClicked === '=') return;
 
+  const formattedUserOperand1 = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 17,
+  }).format(operationState.userOperand1);
+
+  const formattedUserOperand2 = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 17,
+  }).format(operationState.userOperand2);
+
   // create a space around the operator
   if (event.target.classList.contains('btn-ops')) {
-    displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator}`;
+    displayScreen.textContent = `${formattedUserOperand1} ${operationState.currentOperator}`;
   }
 
   if (event.target.classList.contains('btn-nums') || buttonClicked === '.') {
     // display currentOperator instead of nextOperator
     if (operationState.nextOperator === '') {
       // do not display userOperand2 if not building yet
-      if (operationState.userOperand2 === '0') {
-        displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator}`;
-      } else if (operationState.userOperand2 !== '0') {
-        displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator} ${operationState.userOperand2}`;
+      if (operationState.userOperand2 === '') {
+        displayScreen.textContent = `${formattedUserOperand1} ${operationState.currentOperator}`;
+      } else if (operationState.userOperand2 !== '') {
+        displayScreen.textContent = `${formattedUserOperand1} ${operationState.currentOperator} ${formattedUserOperand2}`;
       }
     }
     // display nextOperator instead of currentOperator
     if (operationState.nextOperator) {
       // do not display userOperand2 if not building yet
-      if (operationState.userOperand2 === '0') {
-        displayScreen.textContent = `${operationState.userOperand1} ${operationState.nextOperator}`;
-      } else if (operationState.userOperand2 !== '0') {
-        displayScreen.textContent = `${operationState.userOperand1} ${operationState.nextOperator} ${operationState.userOperand2}`;
+      if (operationState.userOperand2 === '') {
+        displayScreen.textContent = `${formattedUserOperand1} ${operationState.nextOperator}`;
+      } else if (operationState.userOperand2 !== '') {
+        displayScreen.textContent = `${formattedUserOperand1} ${operationState.nextOperator} ${formattedUserOperand2}`;
       }
     }
   }
@@ -592,20 +555,27 @@ function displayOperation(buttonClicked) {
   return;
 }
 
-// - - - DISPLAY RESULT - - - -
+// - - - DISPLAY RESULT, DIV/0 ERROR - - - -
 
 function displayResult(buttonClicked) {
-  if (buttonClicked === '=')
-    displayScreen.textContent = operationState.userOperand1;
+  const formattedUserOperand1 = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 17,
+  }).format(operationState.userOperand1);
+
+  const formattedUserOperand2 = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 17,
+  }).format(operationState.userOperand2);
+
+  if (buttonClicked === '=') displayScreen.textContent = formattedUserOperand1;
 
   if (operationState.userOperand1 == 'Infinity') {
     return (displayScreen.textContent = 'One does not simply divide by 0!');
   }
   if (operationState.nextOperator) {
     if (event.target.classList.contains('btn-ops'))
-      return (displayScreen.textContent = `${operationState.userOperand1} ${operationState.nextOperator}`);
+      return (displayScreen.textContent = `${formattedUserOperand1} ${operationState.nextOperator}`);
   } else if (operationState.nextOperator === '') {
-    return (displayScreen.textContent = `${operationState.userOperand1} ${operationState.currentOperator}`);
+    return (displayScreen.textContent = `${formattedUserOperand1} ${operationState.currentOperator}`);
   }
 }
 
@@ -617,61 +587,43 @@ function clearDisplay() {
     Clearing display.`);
 }
 
-// - - - CLEAR ZERO IF NON-ZERO TYPED FIRST - - - -
+// - - - CLEAR ZERO IF NON-ZERO ENTERED FIRST - - - -
 
-function clearZeroOperand1(buttonClicked) {
-  // ensure operator and equals buttons don't clear the screen
-  if (event.target.classList.contains('btn-nums') || buttonClicked === '.') {
+function clearStartingZeroOperand1(buttonClicked) {
+  if (event.target.classList.contains('btn-nums')) {
     if (
-      // remove the leading '0' from the displayScreen so the user will see one digit when typing a non-zero number rather than two digits starting with 0.
+      // remove the leading '0' so the user will see one digit when typing a non-zero number rather than two digits starting with 0.
       buttonClicked !== 0 &&
-      operationState.userOperand1 === '0' &&
-      buttonClicked !== '.'
+      operationState.userOperand1 === '0'
     ) {
-      displayScreen.textContent = '';
       operationState.userOperand1 = '';
-      console.log(`Current state: ${calculator.currentState} | clearZeroOperand1(buttonClicked) 
-    Clearing leading 0. userOperand2 should now lead with non-zero number: >>>[${operationState.userOperand2}]<<< (should be empty)`);
+      console.log(`Current state: ${calculator.currentState} | clearStartingZeroOperand1(buttonClicked)
+    Clearing leading 0. userOperand1 should now lead with non-zero number: >>>[${operationState.userOperand1}]<<< (should be empty)`);
     }
   }
 }
 
-function addZeroOperand1(buttonClicked) {
-  // ensure operator and equals buttons don't clear the screen
-  if (event.target.classList.contains('btn-nums') || buttonClicked === '.') {
-    if (
-      // add a leading '0' in front of the decimal on the displayScreen so the user will see 0.# rather than .#
-      buttonClicked === '.'
-    ) {
-      operationState.userOperand1 = '0.';
-      console.log(`Current state: ${calculator.currentState} | addZeroOperand1(buttonClicked) 
-    Adding leading 0. userOperand1 should now lead with zero: >>>[${operationState.userOperand1}]<<< (should be '0.')`);
-    } else {
-      operationState.userOperand1 = buttonClicked;
-    }
+// - - - ADD ZERO IF DECIMAL ENTERED FIRST - - - -
+
+function addLeadingZeroOperand1(buttonClicked) {
+  if (
+    // add a leading '0' in front of the decimal on the displayScreen so the user will see '0.#' rather than '.#'
+    buttonClicked === '.'
+  ) {
+    operationState.userOperand1 = '0.';
+    console.log(`Current state: ${calculator.currentState} | addLeadingZeroOperand1(buttonClicked)
+    Adding leading 0. userOperand1 should now lead with zero and decimal: >>>[${operationState.userOperand1}]<<< (should be '0.')`);
+  } else {
+    operationState.userOperand1 = buttonClicked;
   }
 }
 
-function clearZeroOperand2(buttonClicked) {
-  if (
-    (buttonClicked !== '0' || buttonClicked !== '.') &&
-    operationState.userOperand2.length === 1 &&
-    operationState.userOperand2 === '0' &&
-    buttonClicked !== '.'
-  ) {
-    operationState.userOperand2 = '';
-    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2() 
-    Clearing leading 0. userOperand2 should now lead with non-zero number: >>>[${operationState.userOperand2}]<<< (should be empty)`);
-  }
-}
-
-function addZeroOperand2(buttonClicked) {
-  if (
-    (buttonClicked === '0' || buttonClicked === '.') &&
-    operationState.userOperand2 === '0'
-  ) {
+function addLeadingZeroOperand2(buttonClicked) {
+  // add a leading '0' in front of the decimal so the user will see '0.#' rather than '.#'
+  if (buttonClicked === '.' && operationState.userOperand2 === '') {
     operationState.userOperand2 = '0';
-    console.log(`Current state: ${calculator.currentState} | clearZeroOperand2(buttonClicked) 
-    Keeping leading 0 for decimal. Display should now show '0.': ${operationState.userOperand2}`);
+
+    console.log(`Current state: ${calculator.currentState} | addLeadingZeroOperand2(buttonClicked)
+    Adding leading 0. userOperand2 should now lead with zero: >>>[${operationState.userOperand2}]<<< (should be '0.')`);
   }
 }
