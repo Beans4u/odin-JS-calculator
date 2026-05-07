@@ -6,6 +6,10 @@ The goal of this project was to take the core concepts from Foundations and comb
 
 ![Screenshot of a simple browser-based calculator app](calculator_img.png)
 
+## Live Preview
+
+[Project: Calculator](https://beans4u.github.io/odin-JS-calculator/)
+
 ## Overview
 
 This project started as a simple calculator assignment, but quickly became an exercise in managing application state and user interaction cleanly.
